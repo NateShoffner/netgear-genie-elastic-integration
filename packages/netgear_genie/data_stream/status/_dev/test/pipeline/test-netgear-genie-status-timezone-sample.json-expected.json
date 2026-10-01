@@ -1,0 +1,75 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T20:17:08.991918Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "duration": 184000000,
+                "kind": "metric",
+                "original": "{\"current_system_time\":\"Tue Sep 22 00:16:13 2026\",\"device\":{\"cable_mac\":\"00:00:5e:00:53:01\",\"cm_certificate\":\"Installed\",\"firmware_version\":\"V10.01.07\",\"hardware_version\":\"2.02\",\"serial_number\":\"4TK98765B4321\"},\"startup_procedure\":{\"acquire_downstream_channel\":{\"comment\":\"Locked\",\"status\":\"801000000 Hz\"},\"boot_state\":{\"comment\":\"Operational\",\"status\":\"OK\"},\"configuration_file\":{\"comment\":\"d11_m_cm1000v2_subnxgig_c01.cm\",\"status\":\"OK\"},\"connectivity_state\":{\"comment\":\"Operational\",\"status\":\"OK\"},\"ip_provisioning_mode\":{\"comment\":\"IPv6 only\",\"status\":\"Honor MDD\"},\"security\":{\"comment\":\"BPI+\",\"status\":\"Enable\"}},\"system_uptime\":\"602:49:09\",\"web_ui\":{\"login_ok\":true,\"reachable\":true,\"reason\":\"the modem web interface responded and the status page was collected\",\"response_time_ms\":184,\"state\":\"ok\"}}",
+                "outcome": "success",
+                "timezone": "America/New_York"
+            },
+            "netgear_genie": {
+                "status": {
+                    "current_system_time": "2026-09-22T00:16:13.000-04:00",
+                    "device": {
+                        "cable_mac": "00:00:5e:00:53:01",
+                        "cm_certificate": "Installed",
+                        "hardware_version": "2.02"
+                    },
+                    "startup_procedure": {
+                        "acquire_downstream_channel": {
+                            "comment": "Locked",
+                            "frequency": 801000000,
+                            "status": "801000000 Hz"
+                        },
+                        "boot_state": {
+                            "comment": "Operational",
+                            "status": "OK"
+                        },
+                        "configuration_file": {
+                            "comment": "d11_m_cm1000v2_subnxgig_c01.cm",
+                            "status": "OK"
+                        },
+                        "connectivity_state": {
+                            "comment": "Operational",
+                            "status": "OK"
+                        },
+                        "ip_provisioning_mode": {
+                            "comment": "IPv6 only",
+                            "status": "Honor MDD"
+                        },
+                        "security": {
+                            "comment": "BPI+",
+                            "status": "Enable"
+                        }
+                    },
+                    "system_uptime": "602:49:09",
+                    "uptime_seconds": 2170149,
+                    "web_ui": {
+                        "login_ok": true,
+                        "reachable": true,
+                        "reason": "the modem web interface responded and the status page was collected",
+                        "response_time_ms": 184,
+                        "state": "ok"
+                    }
+                }
+            },
+            "observer": {
+                "mac": [
+                    "00-00-5E-00-53-01"
+                ],
+                "serial_number": "4TK98765B4321",
+                "type": "modem",
+                "vendor": "NETGEAR",
+                "version": "V10.01.07"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,59 @@
+{
+    "@timestamp": "2026-09-22T21:19:47.809637500Z",
+    "agent": {
+        "ephemeral_id": "19aac2ae-d44d-49b7-89cb-81c1b955a5dd",
+        "id": "0f9b8ea0-ead3-4773-8be1-d181128f9021",
+        "name": "elastic-agent-49925",
+        "type": "filebeat",
+        "version": "9.4.3"
+    },
+    "data_stream": {
+        "dataset": "netgear_genie.channel",
+        "namespace": "56934",
+        "type": "metrics"
+    },
+    "ecs": {
+        "version": "9.3.0"
+    },
+    "elastic_agent": {
+        "id": "0f9b8ea0-ead3-4773-8be1-d181128f9021",
+        "snapshot": false,
+        "version": "9.4.3"
+    },
+    "event": {
+        "agent_id_status": "verified",
+        "dataset": "netgear_genie.channel",
+        "ingested": "2026-09-22T21:19:47Z",
+        "kind": "metric",
+        "original": "{\"channel\":\"1\",\"channel_id\":\"25\",\"correctable_codewords\":\"529\",\"frequency\":\"801000000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"QAM256\",\"modulation_type\":\"sc_qam\",\"power\":\"-4.9 dBmV\",\"snr\":\"42.3 dB\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"1334\",\"unerrored_codewords\":\"4077504903\"}"
+    },
+    "input": {
+        "type": "cel"
+    },
+    "netgear_genie": {
+        "channel": {
+            "channel": 1,
+            "channel_id": 25,
+            "correctable_codewords": 529,
+            "frequency": 801000000,
+            "lock_status": "Locked",
+            "locked": true,
+            "modulation": "QAM256",
+            "modulation_type": "sc_qam",
+            "power": -4.9,
+            "snr": 42.3,
+            "type": "downstream",
+            "uncorrectable_codewords": 1334,
+            "unerrored_codewords": 4077504903
+        }
+    },
+    "observer": {
+        "type": "modem",
+        "vendor": "NETGEAR"
+    },
+    "tags": [
+        "preserve_original_event",
+        "forwarded",
+        "netgear_genie-channel"
+    ]
+}

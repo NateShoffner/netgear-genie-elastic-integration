@@ -1,0 +1,32 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T20:15:08.501121600Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"web_ui\":{\"login_ok\":false,\"reachable\":true,\"reason\":\"POST /goform/GenieLogin: the modem sent the login back to /GenieLogin.asp, check the username and password\",\"state\":\"auth_failed\"}}",
+                "outcome": "failure"
+            },
+            "netgear_genie": {
+                "status": {
+                    "web_ui": {
+                        "login_ok": false,
+                        "reachable": true,
+                        "reason": "POST /goform/GenieLogin: the modem sent the login back to /GenieLogin.asp, check the username and password",
+                        "state": "auth_failed"
+                    }
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

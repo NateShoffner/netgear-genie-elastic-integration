@@ -1,0 +1,71 @@
+{
+    "@timestamp": "2026-08-31T07:56:40.000Z",
+    "agent": {
+        "ephemeral_id": "4d04b0c3-9e26-4b39-91df-c012212910ab",
+        "id": "8b957710-1a18-483a-a9cf-844e90a8a102",
+        "name": "elastic-agent-64415",
+        "type": "filebeat",
+        "version": "9.4.3"
+    },
+    "data_stream": {
+        "dataset": "netgear_genie.event_log",
+        "namespace": "46308",
+        "type": "logs"
+    },
+    "ecs": {
+        "version": "9.3.0"
+    },
+    "elastic_agent": {
+        "id": "8b957710-1a18-483a-a9cf-844e90a8a102",
+        "snapshot": false,
+        "version": "9.4.3"
+    },
+    "event": {
+        "agent_id_status": "verified",
+        "category": [
+            "network"
+        ],
+        "code": "69010200",
+        "dataset": "netgear_genie.event_log",
+        "end": "2026-08-31T07:56:40.000Z",
+        "ingested": "2026-09-22T21:18:00Z",
+        "kind": "event",
+        "module": "netgear_genie",
+        "original": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:56:40\",\"id\":\"69010200\",\"index\":\"9\",\"last_time\":\"2026-08-31, 07:56:40\",\"level\":\"Notice (6)\",\"text\":\"Cable Modem Reboot because of - 'Reboot UI' \\u0026 power cycle;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;\"}",
+        "severity": 6,
+        "start": "2026-08-31T07:56:40.000Z",
+        "timezone": "UTC",
+        "type": [
+            "info"
+        ]
+    },
+    "input": {
+        "type": "cel"
+    },
+    "log": {
+        "level": "notice"
+    },
+    "message": "Cable Modem Reboot because of - 'Reboot UI' & power cycle",
+    "netgear_genie": {
+        "event_log": {
+            "cm_mac": "00:00:5e:00:53:01",
+            "cm_qos": "1.1",
+            "cm_ver": "3.1",
+            "cmts_mac": "00:00:00:00:00:00",
+            "count": 1,
+            "index": 9
+        }
+    },
+    "observer": {
+        "mac": [
+            "00-00-5E-00-53-01"
+        ],
+        "type": "modem",
+        "vendor": "NETGEAR"
+    },
+    "tags": [
+        "preserve_original_event",
+        "forwarded",
+        "netgear_genie-event_log"
+    ]
+}

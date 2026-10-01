@@ -1,0 +1,495 @@
+rules:
+  # Step 1: login page carrying the one-time webToken (unquoted digits) and
+  # the SessionID cookie the V10.01.07 firmware sets.
+  - path: /GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <title>NETGEAR Modem CM1000v2</title>
+          </head>
+          <body>
+              <form id="target"  name="login" method="POST" action="/goform/GenieLogin">
+                  <input type="text" name="loginUsername" size="18" maxlength="32" value="">
+                  <input type="password" name="loginPassword" size="18" maxlength="32" value="">
+                  <button id="apply" value="1" type="SUBMIT" name="login" class="button-apply">Login</button>
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  # Step 2a: correct credentials and token. The modem answers with a 302 to
+  # /GenieIndex.asp. The form body is merged into the query by the mock.
+  # The redirect carries a short HTML body, which is what the modem's own
+  # HTTP/1.0 redirects do. Once the client has followed such a redirect the
+  # body can no longer be read, the request fails with "read on closed response
+  # body" and the collector never sees where the login landed, so it assumes
+  # the login worked and lets the DOCSIS status page decide. That is the path a
+  # real modem takes, so the default test credentials take it too.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: admin
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: '<html><body>Redirect</body></html>'
+  # Step 2b: a successful login whose redirect carries no body. Nothing is left
+  # unread, so the redirect is followed through and the collector reads the
+  # landing page from the final request URL. Selected with the `bodyless-user`
+  # name. The two rules below are bodyless for the same reason: they are told
+  # apart by the page the login lands on, and a body-carrying redirect hides
+  # that page, which is the limitation the `admin` rule above models.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: bodyless-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Step 2c: another device already holds the single session, so the modem
+  # sends the login to /MultiLogin.asp. Selected with the `busy-user` name.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: busy-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/MultiLogin.asp'
+        body: ''
+  # Step 2d: any other login attempt (bad credentials or stale token) is sent
+  # back to the login page.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieLogin.asp'
+        body: ''
+  # Session takeover page, reached when another device holds the session. It
+  # carries both a fresh webToken and the RetailSessionId to hand back.
+  - path: /MultiLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form method="POST" action="/goform/MultiLogin">
+                  You are currently logged in from another device. There can be only one device logged in at a time.
+                  <input type="hidden" name="RetailSessionId" value="987654321" />
+                  <input type="hidden" name="webToken" value=1234567890 />
+                  <input type="hidden" name="Act" value="yes" />
+                  <button id="yes" value="yes" type="SUBMIT" name="yes" class="button-apply">Yes</button>
+              </form>
+          </body>
+          </html>
+  # Session takeover. The modem drops the other device's session and lands on
+  # the Genie index page.
+  - path: /goform/MultiLogin
+    methods: ['POST']
+    query_params:
+      'yes': 'yes'
+      Act: 'yes'
+      RetailSessionId: '987654321'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Redirect target of a successful login or session takeover.
+  - path: /GenieIndex.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><head><title>NETGEAR Modem CM1000v2</title></head><body></body></html>
+  # Step 3: the DOCSIS status page, served only when the session cookie is
+  # sent back. The page carries the four channel tables (32 downstream
+  # bonded, 8 upstream bonded, 2 downstream OFDM and 2 upstream OFDMA rows),
+  # a stale JavaScript tagValueList and commented-out rows that the CEL
+  # program must ignore.
+  - path: /DocsisStatus.asp
+    methods: ['GET']
+    request_headers:
+      Cookie:
+        - 'SessionID=1234567890'
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+              <head>
+                  <META name="description" content='CM1000v2'>
+                  <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+                  <title>NETGEAR Modem CM1000v2</title>
+                  <script language="javascript" type="text/javascript">
+                      function InitTagValue()
+                      {
+                          // Stale hard-coded placeholders, not the live data.
+                          var tagValueList = '453000000|Locked|OK|Operational|OK|Operational|OK|CM.cfg|Disabled|Disabled|Mon Jun 11 15:30:50 2012|0|';
+                          return tagValueList.split("|");
+                      }
+
+                      function InitDsTagValue()
+                      {
+                          // Stale hard-coded placeholders, not the live data.
+                          var tagValueList = '8|1|Locked|QAM64|143|453000000 Hz|-2.5|48.5|2|Not Locked|Unknown|0|0 Hz|0.0|0.0';
+                          return tagValueList.split("|");
+                      }
+                  </script>
+              </head>
+              <body class="page-body">
+                  <table>
+                      <tr><td colspan="2"><b><tabindex=-1>Startup Procedure</tabindex=-1></b></td></tr>
+                      <tr><td>
+                          <table id="startup_procedure_table" name="Startup_Procedure" border="1" cellpadding="2" cellspacing="0" class="TableStyle">
+                              <tr>
+                                  <td><span class="thead"><b>Procedure</b></span></td>
+                                  <td><span class="thead"><b>Status</b></span></td>
+                                  <td><span class="thead"><b>Comment</b></span></td>
+                              </tr>
+                              <tr><td class="style1">Acquire Downstream Channel</td><td>801000000 Hz</td><td>Locked</td></tr>
+                              <tr><td class="style1">Connectivity State</td><td>OK</td><td>Operational</td></tr>
+                              <tr><td class="style1">Boot State</td><td>OK</td><td>Operational</td></tr>
+                              <tr style="display:none"><!-- Hidden config file field -->
+                                  <td class="style1">Configuration File</td><td>OK</td><td>d11_m_cm1000v2_subnxgig_c01.cm</td>
+                              </tr>
+                              <tr><td class="style1">Security</td><td>Enable</td><td>BPI+</td></tr>
+                              <tr><td class="style1">IP Provisioning Mode</td><td>Honor MDD</td><td>IPv6 only</td></tr>
+                          </table>
+                      </td></tr>
+                      <tr><td><b><tabindex=-1>Downstream Bonded Channels</tabindex=-1></b></td></tr>
+                      <tr><td>
+                      <div class="in-frame-table">
+                      <table border="1" cellpadding="2" cellspacing="0" id="dsTable" class="TableStyle">
+                        <tr>
+                          <td><span class="thead">Channel</span></td>
+                          <td><span class="thead">Lock Status</span></td>
+                          <td><span class="thead">Modulation</span></td>
+                          <td><span class="thead">Channel ID</span></td>
+                          <td><span class="thead">Frequency</span></td>
+                          <td><span class="thead">Power</span></td>
+                          <td><span class="thead">SNR / MER</span></td>
+                          <td><span class="thead">Unerrored Codewords</span></td>
+                          <td><span class="thead">Correctable Codewords</span></td>
+                          <td><span class="thead">Uncorrectable Codewords</span></td>
+                          </tr>
+                   <tr><td>1</td><td>Locked</td><td>QAM256</td><td>25</td><td>801000000 Hz</td><td>-4.9 dBmV</td><td>42.3 dB</td><td>4077504903</td><td>529</td><td>1334</td></tr>
+                   <tr><td>2</td><td>Locked</td><td>QAM256</td><td>1</td><td>387000000 Hz</td><td>-2.3 dBmV</td><td>43.9 dB</td><td>4052234385</td><td>380</td><td>1648</td></tr>
+                   <tr><td>3</td><td>Locked</td><td>QAM256</td><td>2</td><td>393000000 Hz</td><td>-2.2 dBmV</td><td>44.2 dB</td><td>4079486234</td><td>991</td><td>1908</td></tr>
+                   <tr><td>4</td><td>Locked</td><td>QAM256</td><td>3</td><td>399000000 Hz</td><td>-2.0 dBmV</td><td>44.3 dB</td><td>4079565912</td><td>527</td><td>2329</td></tr>
+                   <tr><td>5</td><td>Locked</td><td>QAM256</td><td>4</td><td>405000000 Hz</td><td>-2.2 dBmV</td><td>44.2 dB</td><td>4079585993</td><td>522</td><td>2328</td></tr>
+                   <tr><td>6</td><td>Locked</td><td>QAM256</td><td>5</td><td>411000000 Hz</td><td>-2.3 dBmV</td><td>44.1 dB</td><td>4079600815</td><td>512</td><td>2297</td></tr>
+                   <tr><td>7</td><td>Locked</td><td>QAM256</td><td>6</td><td>417000000 Hz</td><td>-2.1 dBmV</td><td>44.2 dB</td><td>4079597660</td><td>476</td><td>2340</td></tr>
+                   <tr><td>8</td><td>Locked</td><td>QAM256</td><td>7</td><td>423000000 Hz</td><td>-2.5 dBmV</td><td>44.2 dB</td><td>4079607191</td><td>517</td><td>2325</td></tr>
+                   <tr><td>9</td><td>Locked</td><td>QAM256</td><td>8</td><td>429000000 Hz</td><td>-2.6 dBmV</td><td>44.1 dB</td><td>4079726420</td><td>581</td><td>2787</td></tr>
+                   <tr><td>10</td><td>Locked</td><td>QAM256</td><td>9</td><td>435000000 Hz</td><td>-2.2 dBmV</td><td>44.3 dB</td><td>4079730823</td><td>588</td><td>2832</td></tr>
+                   <tr><td>11</td><td>Locked</td><td>QAM256</td><td>10</td><td>441000000 Hz</td><td>-2.5 dBmV</td><td>44.2 dB</td><td>4079732515</td><td>579</td><td>2834</td></tr>
+                   <tr><td>12</td><td>Locked</td><td>QAM256</td><td>11</td><td>447000000 Hz</td><td>-2.7 dBmV</td><td>44.3 dB</td><td>4079732200</td><td>551</td><td>2827</td></tr>
+                   <tr><td>13</td><td>Locked</td><td>QAM256</td><td>12</td><td>453000000 Hz</td><td>-2.3 dBmV</td><td>44.3 dB</td><td>4079743753</td><td>604</td><td>2755</td></tr>
+                   <tr><td>14</td><td>Locked</td><td>QAM256</td><td>13</td><td>459000000 Hz</td><td>-2.5 dBmV</td><td>44.2 dB</td><td>4079744402</td><td>545</td><td>2811</td></tr>
+                   <tr><td>15</td><td>Locked</td><td>QAM256</td><td>14</td><td>465000000 Hz</td><td>-2.5 dBmV</td><td>44.4 dB</td><td>4079748251</td><td>565</td><td>2772</td></tr>
+                   <tr><td>16</td><td>Locked</td><td>QAM256</td><td>15</td><td>471000000 Hz</td><td>-2.3 dBmV</td><td>44.3 dB</td><td>4079755122</td><td>549</td><td>2800</td></tr>
+                   <tr><td>17</td><td>Locked</td><td>QAM256</td><td>16</td><td>477000000 Hz</td><td>-2.5 dBmV</td><td>44.2 dB</td><td>4079756029</td><td>543</td><td>2795</td></tr>
+                   <tr><td>18</td><td>Locked</td><td>QAM256</td><td>17</td><td>483000000 Hz</td><td>-2.3 dBmV</td><td>44.4 dB</td><td>4079759244</td><td>537</td><td>2643</td></tr>
+                   <tr><td>19</td><td>Locked</td><td>QAM256</td><td>18</td><td>489000000 Hz</td><td>-2.4 dBmV</td><td>44.4 dB</td><td>4079765203</td><td>560</td><td>2628</td></tr>
+                   <tr><td>20</td><td>Locked</td><td>QAM256</td><td>19</td><td>495000000 Hz</td><td>-2.1 dBmV</td><td>44.5 dB</td><td>4079771402</td><td>551</td><td>2614</td></tr>
+                   <tr><td>21</td><td>Locked</td><td>QAM256</td><td>20</td><td>765000000 Hz</td><td>-4.0 dBmV</td><td>43.0 dB</td><td>4079779023</td><td>609</td><td>2353</td></tr>
+                   <tr><td>22</td><td>Locked</td><td>QAM256</td><td>21</td><td>771000000 Hz</td><td>-3.7 dBmV</td><td>42.9 dB</td><td>4079779568</td><td>595</td><td>2566</td></tr>
+                   <tr><td>23</td><td>Locked</td><td>QAM256</td><td>22</td><td>777000000 Hz</td><td>-4.8 dBmV</td><td>42.3 dB</td><td>4079783820</td><td>631</td><td>2512</td></tr>
+                   <tr><td>24</td><td>Locked</td><td>QAM256</td><td>23</td><td>783000000 Hz</td><td>-4.4 dBmV</td><td>42.8 dB</td><td>4079787527</td><td>564</td><td>2552</td></tr>
+                   <tr><td>25</td><td>Locked</td><td>QAM256</td><td>24</td><td>789000000 Hz</td><td>-4.4 dBmV</td><td>42.6 dB</td><td>4079794528</td><td>596</td><td>2534</td></tr>
+                   <tr><td>26</td><td>Locked</td><td>QAM256</td><td>26</td><td>807000000 Hz</td><td>-4.7 dBmV</td><td>42.5 dB</td><td>4079799843</td><td>559</td><td>2604</td></tr>
+                   <tr><td>27</td><td>Locked</td><td>QAM256</td><td>27</td><td>813000000 Hz</td><td>-5.0 dBmV</td><td>42.2 dB</td><td>4079808670</td><td>536</td><td>2598</td></tr>
+                   <tr><td>28</td><td>Locked</td><td>QAM256</td><td>28</td><td>819000000 Hz</td><td>-4.7 dBmV</td><td>42.3 dB</td><td>4079801453</td><td>527</td><td>2647</td></tr>
+                   <tr><td>29</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td><td> 0.0 dB</td><td>0</td><td>0</td><td>0</td></tr>
+                   <tr><td>30</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td><td> 0.0 dB</td><td>0</td><td>0</td><td>0</td></tr>
+                   <tr><td>31</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td><td> 0.0 dB</td><td>0</td><td>0</td><td>0</td></tr>
+                   <tr><td>32</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td><td> 0.0 dB</td><td>0</td><td>0</td><td>0</td></tr>
+                  </table>
+                  </div>
+                      <!--
+                          <tr><td>1</td><td>Locked</td><td>unknown</td><td>0</td><td>809500000 Hz</td><td>-61.6 dBmV</td><td> 0.0 dB</td></tr>
+                          <tr><td>2</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td><td> 0.0 dB</td></tr>
+                          -->
+                      </td></tr>
+                      <tr><td><b><tabindex=-1>Upstream Bonded Channels</tabindex=-1></b></td></tr>
+                      <tr><td>
+                      <div class="in-frame-table">
+                      <table border ="1" cellpadding ="2" cellspacing ="0" class="TableStyle" id="usTable">
+                       <tr>
+                          <td><span class="thead">Channel</span></td>
+                          <td><span class="thead">Lock Status</span></td>
+                          <td><span class="thead">Modulation</span></td>
+                          <td><span class="thead">Channel ID</span></td>
+                          <td><span class="thead">Frequency</span></td>
+                          <td><span class="thead">Power</span></td>
+                       </tr>
+                   <tr><td>1</td><td>Locked</td><td>ATDMA</td><td>17</td><td>16400000 Hz</td><td>47.5 dBmV</td></tr>
+                   <tr><td>2</td><td>Locked</td><td>ATDMA</td><td>18</td><td>22800000 Hz</td><td>47.5 dBmV</td></tr>
+                   <tr><td>3</td><td>Locked</td><td>ATDMA</td><td>19</td><td>29200000 Hz</td><td>47.5 dBmV</td></tr>
+                   <tr><td>4</td><td>Locked</td><td>ATDMA</td><td>20</td><td>35600000 Hz</td><td>47.0 dBmV</td></tr>
+                   <tr><td>5</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td></tr>
+                   <tr><td>6</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td></tr>
+                   <tr><td>7</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td></tr>
+                   <tr><td>8</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td> 0.0 dBmV</td></tr>
+                  </table>
+                  </div>
+                      <!--
+                          <tr><td>1</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Ksym/sec</td><td>0 Hz</td><td> 0.0 dBmV</td></tr>
+                          -->
+                      </td></tr>
+                      <tr><td><b><tabindex=-1>Downstream OFDM Channels</tabindex=-1></b></td></tr>
+                      <tr><td>
+                      <div class="in-frame-table">
+                      <table border="1" cellpadding="2" cellspacing="0" id="d31dsTable" class="TableStyle">
+                        <tr>
+                          <td><span class="thead">Channel</span></td>
+                          <td><span class="thead">Lock Status</span></td>
+                          <td><span class="thead">Modulation / Profile ID</span></td>
+                          <td><span class="thead">Channel ID</span></td>
+                          <td><span class="thead">Frequency</span></td>
+                          <td><span class="thead">Power</span></td>
+                          <td><span class="thead">SNR / MER</span></td>
+                          <td><span class="thead">Active Subcarrier Number Range</span></td>
+                          <td><span class="thead">Unerrored Codewords</span></td>
+                          <td><span class="thead">Correctable Codewords</span></td>
+                          <td><span class="thead">Uncorrectable Codewords</span></td>
+                          </tr>
+          <tr><td>1</td><td>Locked</td><td>0, 1, 2, 3</td><td>193</td><td>900000000 Hz</td><td>-1.2 dBmV</td><td>41.8 dB</td><td>268 ~ 3827</td><td>76474070478</td><td>10892213027</td><td>1358</td></tr>
+          <tr><td>2</td><td>Not Locked</td><td>0</td><td>0</td><td>0 Hz</td><td>-1.2 dBmV</td><td>41.5 dB</td><td>0 ~ 4095</td><td>290723043</td><td>17504</td><td>0</td></tr>
+          </table>
+                  </div>
+                      </td></tr>
+                      <tr><td><b><tabindex=-1>Upstream OFDMA Channels</tabindex=-1></b></td></tr>
+                      <tr><td>
+                      <div class="in-frame-table">
+                      <table border="1" cellpadding="2" cellspacing="0" id="d31usTable" class="TableStyle">
+                        <tr>
+                          <td><span class="thead">Channel</span></td>
+                          <td><span class="thead">Lock Status</span></td>
+                          <td><span class="thead">Modulation / Profile ID</span></td>
+                          <td><span class="thead">Channel ID</span></td>
+                          <td><span class="thead">Frequency</span></td>
+                          <td><span class="thead">Power</span></td>
+                          </tr>
+          <tr><td>1</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td>0 dBmV</td></tr>
+          <tr><td>2</td><td>Not Locked</td><td>Unknown</td><td>0</td><td>0 Hz</td><td>0 dBmV</td></tr>
+          </table>
+                  </div>
+                      </td></tr>
+                      <tr>
+                          <td id="Current_systemtime" name="CurrentSystemTime"><font face="Helvetica" size="2"><b>Current System Time:&nbsp;</b>Tue Sep 22 00:16:13 2026
+          </font><br></td>
+                      </tr>
+                      <tr>
+                          <td id="SystemUpTime" name="SystemUpTime"><font face="Helvetica" size="2"><b>System Up Time:&nbsp;</b>602:49:09</font><br></td>
+                      </tr>
+                  </table>
+              </body>
+          </html>
+  # Any request for a protected page without the session cookie gets the
+  # 613-byte login-redirect stub, which is also what a modem with a wedged
+  # web server returns after an apparently successful login.
+  - path: /DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <META http-equiv="Content-Style-Type" content="text/css">
+              <META http-equiv="Pragma" content="no-cache">
+              <META HTTP-equiv="Cache-Control" content="no-cache">
+              <META HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT">
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # Wedged web server, selected with a `/stuck` base URL: the login succeeds but
+  # every protected page keeps answering with the login-redirect stub, including
+  # after a session takeover.
+  - path: /stuck/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form id="target" name="login" method="POST" action="/goform/GenieLogin">
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  # `bodyless-user` gets a redirect with no body, so the login is known to have
+  # been accepted and the stuck report does not have to hedge about the
+  # credentials.
+  - path: /stuck/goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: bodyless-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Every other login gets the body-carrying redirect the real modem sends, so
+  # the collector cannot tell whether the credentials were accepted and says so
+  # in the stuck report.
+  - path: /stuck/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: '<html><body>Redirect</body></html>'
+  - path: /stuck/MultiLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form method="POST" action="/goform/MultiLogin">
+                  You are currently logged in from another device. There can be only one device logged in at a time.
+                  <input type="hidden" name="RetailSessionId" value="987654321" />
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  - path: /stuck/goform/MultiLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /stuck/DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <META http-equiv="Content-Style-Type" content="text/css">
+              <META http-equiv="Pragma" content="no-cache">
+              <META HTTP-equiv="Cache-Control" content="no-cache">
+              <META HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT">
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # The DOCSIS status page answers with an unexpected HTTP status, selected with
+  # a `/httperr` base URL.
+  - path: /httperr/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><body><form><input type="hidden" name="webToken" value=1234567890 /></form></body></html>
+  # Bodyless redirect so this scenario isolates the page error from the login.
+  - path: /httperr/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /httperr/DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 503
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: '<html><body>Service Unavailable</body></html>'

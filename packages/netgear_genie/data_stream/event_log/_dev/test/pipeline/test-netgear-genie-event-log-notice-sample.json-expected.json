@@ -1,0 +1,132 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-08-31T07:59:52.000Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "category": [
+                    "network"
+                ],
+                "code": "67061600",
+                "end": "2026-08-31T07:59:52.000Z",
+                "kind": "event",
+                "original": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:59:52\",\"id\":\"67061600\",\"index\":\"22\",\"last_time\":\"2026-08-31, 07:59:52\",\"level\":\"Notice (6)\",\"text\":\"DS profile assignment change. DS Chan ID: 32; Previous Profile: ; New Profile: 1 2 3.;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}",
+                "severity": 6,
+                "start": "2026-08-31T07:59:52.000Z",
+                "timezone": "UTC",
+                "type": [
+                    "info"
+                ]
+            },
+            "log": {
+                "level": "notice"
+            },
+            "message": "DS profile assignment change. DS Chan ID: 32; Previous Profile: ; New Profile: 1 2 3.",
+            "netgear_genie": {
+                "event_log": {
+                    "cm_mac": "00:00:5e:00:53:01",
+                    "cm_qos": "1.1",
+                    "cm_ver": "3.1",
+                    "cmts_mac": "00:00:5e:00:53:02",
+                    "count": 1,
+                    "index": 22
+                }
+            },
+            "observer": {
+                "mac": [
+                    "00-00-5E-00-53-01"
+                ],
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "@timestamp": "2026-08-31T07:59:42.000Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "category": [
+                    "network"
+                ],
+                "code": "-1858273230",
+                "end": "2026-08-31T07:59:42.000Z",
+                "kind": "event",
+                "original": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:59:42\",\"id\":\"-1858273230\",\"index\":\"23\",\"last_time\":\"2026-08-31, 07:59:42\",\"level\":\"Notice (6)\",\"text\":\"Honoring MDD; IP provisioning mode = IPv6\"}",
+                "severity": 6,
+                "start": "2026-08-31T07:59:42.000Z",
+                "timezone": "UTC",
+                "type": [
+                    "info"
+                ]
+            },
+            "log": {
+                "level": "notice"
+            },
+            "message": "Honoring MDD; IP provisioning mode = IPv6",
+            "netgear_genie": {
+                "event_log": {
+                    "count": 1,
+                    "index": 23
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "@timestamp": "2026-08-31T07:56:40.000Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "category": [
+                    "network"
+                ],
+                "code": "69010200",
+                "end": "2026-08-31T07:56:40.000Z",
+                "kind": "event",
+                "original": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:56:40\",\"id\":\"69010200\",\"index\":\"9\",\"last_time\":\"2026-08-31, 07:56:40\",\"level\":\"Notice (6)\",\"text\":\"Cable Modem Reboot because of - 'Reboot UI' & power cycle;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;\"}",
+                "severity": 6,
+                "start": "2026-08-31T07:56:40.000Z",
+                "timezone": "UTC",
+                "type": [
+                    "info"
+                ]
+            },
+            "log": {
+                "level": "notice"
+            },
+            "message": "Cable Modem Reboot because of - 'Reboot UI' & power cycle",
+            "netgear_genie": {
+                "event_log": {
+                    "cm_mac": "00:00:5e:00:53:01",
+                    "cm_qos": "1.1",
+                    "cm_ver": "3.1",
+                    "cmts_mac": "00:00:00:00:00:00",
+                    "count": 1,
+                    "index": 9
+                }
+            },
+            "observer": {
+                "mac": [
+                    "00-00-5E-00-53-01"
+                ],
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,355 @@
+interval: {{interval}}
+resource.tracer:
+  enabled: {{enable_request_tracer}}
+  filename: "../../logs/cel/http-request-trace-*.ndjson"
+  maxbackups: 5
+{{#if http_client_timeout}}
+resource.timeout: {{http_client_timeout}}
+{{/if}}
+# resource.redirect.max_redirects is deliberately not set, so redirects are
+# followed up to the input's default of 10. The modem answers the login form
+# with a redirect and the page it lands on is what says whether the login was
+# accepted, so the redirect has to be followed for the program to see it.
+# Setting max_redirects to 0 does not hand the unfollowed redirect back to the
+# program: the CEL input refuses the first redirect and the request fails with
+# "stopped after 0 redirects", leaving neither a Location header nor a landing
+# page to read.
+resource.url: {{url}}
+state:
+  username: {{escape_string username}}
+  password: {{escape_string password}}
+  take_over_session: {{take_over_session}}
+redact:
+  fields:
+    - password
+regexp:
+  web_token: 'name=\x22?webToken\x22?\s*value=\x22?(\d+)'
+  retail_session_id: 'name=\x22?RetailSessionId\x22?[^>]*?value=\x22?([^\x22\s/>]*)'
+  xml_format: "(?s)var xmlFormat = '(<docsDevEventTable>.*</docsDevEventTable>)';"
+program: |-
+  // Step 1: fetch the login page, scrape the one-time webToken and keep the
+  // SessionID cookie the modem's web server sets.
+  try(get(state.url.trim_right("/") + "/GenieLogin.asp"), "error").as(resp,
+    has(resp.error) ?
+      dyn(
+        {
+          "error": {
+            "message": "GET /GenieLogin.asp: unreachable: " + resp.error,
+          },
+        }
+      )
+    : (resp.StatusCode != 200) ?
+      dyn(
+        {
+          "error": {
+            "code": string(resp.StatusCode),
+            "id": string(resp.Status),
+            "message": "GET /GenieLogin.asp: http_error: " + ((size(resp.Body) != 0) ? string(resp.Body) : string(resp.Status)),
+          },
+        }
+      )
+    :
+      dyn(string(resp.Body).re_find_submatch("web_token")).as(m,
+        (size(m) != 2) ?
+          dyn(
+            {
+              "error": {
+                "message": "GET /GenieLogin.asp: http_error: the page returned by the modem is not the login page, it carries no webToken",
+              },
+            }
+          )
+        :
+          dyn(
+            {
+              "token": m[1],
+              "hdr": {
+                ?"Cookie": resp.Header[?"Set-Cookie"].optMap(c, [c[0].split(";")[0]]),
+              },
+            }
+          )
+      )
+  ).as(step,
+    has(step.error) ?
+      step
+    :
+      // Step 2: log in. The modem answers with a 302 to /GenieIndex.asp on
+      // success, to /GenieLogin.asp or /Index.asp on bad credentials and to
+      // /MultiLogin.asp when another device already holds the single session.
+      // The redirect is followed, so the outcome is read from the path the
+      // final request landed on. A redirect that was answered but not followed
+      // still carries its Location header, which is read instead. The modem's
+      // HTTP/1.0 redirect carries a short body that the client can no longer
+      // read once it has moved on to the redirect target, which fails the
+      // request without a landing page; the login outcome is then unknown and
+      // the event log page has to decide.
+      try(
+        post_request(
+          state.url.trim_right("/") + "/goform/GenieLogin",
+          "application/x-www-form-urlencoded",
+          {"loginUsername": [state.username]}.format_query() + "&" + {"loginPassword": [state.password]}.format_query() + "&login=1&webToken=" + step.token
+        ).with(
+          {
+            "Header": step.hdr.with({"Content-Type": ["application/x-www-form-urlencoded"]}),
+          }
+        ).do_request(),
+        "error"
+      ).as(resp,
+        !has(resp.error) ?
+          {
+            "dest": (resp.StatusCode >= 300 && resp.StatusCode < 400) ?
+              resp.Header.?Location[0].orValue("")
+            :
+              resp.Request.URL.parse_url().Path,
+            "unread": false,
+          }
+        : resp.error.contains("read on closed response body") ?
+          {"dest": "/GenieIndex.asp", "unread": true}
+        :
+          {"dest": "", "unread": false, "unreachable": resp.error}
+      ).as(login,
+        has(login.unreachable) ?
+          dyn(
+            {
+              "error": {
+                "message": "POST /goform/GenieLogin: unreachable: " + login.unreachable,
+              },
+            }
+          )
+        : login.dest.contains("MultiLogin.asp") ?
+          dyn(step.with({"multi": true, "unread": false}))
+        : login.dest.contains("GenieIndex.asp") ?
+          dyn(step.with({"multi": false, "unread": login.unread}))
+        :
+          dyn(
+            {
+              "error": {
+                "message": "POST /goform/GenieLogin: auth_failed: the modem sent the login back to " + login.dest + ", check the username and password",
+              },
+            }
+          )
+      )
+  ).as(step,
+    (has(step.error) || !(step.multi || state.?take_over.orValue(false))) ?
+      step
+    : !state.take_over_session ?
+      {
+        "error": {
+          "message": "POST /goform/GenieLogin: session_conflict: another device is logged in to the modem's web interface" + " and the modem allows only one session at a time; enable \"Take over the modem web session\"" + " to log the other device out",
+        },
+      }
+    :
+      // Step 3: another device holds the single session, or the last poll saw the
+      // login-redirect stub, so take the session over. The takeover page carries
+      // its own webToken and the session id to hand back.
+      try(request("GET", state.url.trim_right("/") + "/MultiLogin.asp").with({"Header": step.hdr}).do_request(), "error").as(resp,
+        has(resp.error) ?
+          dyn(
+            {
+              "error": {
+                "message": "GET /MultiLogin.asp: unreachable: " + resp.error,
+              },
+            }
+          )
+        : (resp.StatusCode != 200) ?
+          dyn(
+            {
+              "error": {
+                "code": string(resp.StatusCode),
+                "id": string(resp.Status),
+                "message": "GET /MultiLogin.asp: http_error: " + ((size(resp.Body) != 0) ? string(resp.Body) : string(resp.Status)),
+              },
+            }
+          )
+        :
+          dyn(
+            {
+              "token": dyn(string(resp.Body).re_find_submatch("web_token")),
+              "session": dyn(string(resp.Body).re_find_submatch("retail_session_id")),
+            }
+          ).as(m,
+            (size(m.token) != 2) ?
+              dyn(
+                {
+                  "error": {
+                    "message": "GET /MultiLogin.asp: http_error: the session takeover page carries no webToken",
+                  },
+                }
+              )
+            :
+              try(
+                post_request(
+                  state.url.trim_right("/") + "/goform/MultiLogin",
+                  "application/x-www-form-urlencoded",
+                  "yes=yes&Act=yes&RetailSessionId=" + ((size(m.session) == 2) ? string(m.session[1]) : "") + "&webToken=" + string(m.token[1])
+                ).with(
+                  {
+                    "Header": step.hdr.with({"Content-Type": ["application/x-www-form-urlencoded"]}),
+                  }
+                ).do_request(),
+                "error"
+              ).as(resp,
+                (has(resp.error) && !resp.error.contains("read on closed response body")) ?
+                  dyn(
+                    {
+                      "error": {
+                        "message": "POST /goform/MultiLogin: unreachable: " + resp.error,
+                      },
+                    }
+                  )
+                :
+                  dyn(step.with({"took_over": true}))
+              )
+          )
+      )
+  ).as(step,
+    has(step.error) ?
+      step
+    :
+      // Step 4: fetch the event log page. An unauthenticated session, or a modem
+      // whose web server is wedged, answers with a short stub that redirects back
+      // to the login page instead of the event table.
+      try(request("GET", state.url.trim_right("/") + "/EventLog.asp").with({"Header": step.hdr}).do_request(), "error").as(resp,
+        has(resp.error) ?
+          dyn(
+            {
+              "error": {
+                "message": "GET /EventLog.asp: unreachable: " + resp.error,
+              },
+            }
+          )
+        : (resp.StatusCode != 200) ?
+          dyn(
+            {
+              "error": {
+                "code": string(resp.StatusCode),
+                "id": string(resp.Status),
+                "message": "GET /EventLog.asp: http_error: " + ((size(resp.Body) != 0) ? string(resp.Body) : string(resp.Status)),
+              },
+            }
+          )
+        :
+          // The event table is embedded in the page as a single quoted XML string
+          // in a JavaScript assignment. When it is missing the page is the
+          // login-redirect stub: another device may have taken the session
+          // between the login and this request, so take the session over and
+          // re-evaluate once before reporting the modem as stuck.
+          dyn(string(resp.Body).re_find_submatch("xml_format")).as(m,
+            (size(m) == 2) ?
+              dyn(step.with({"xml": string(m[1]).replace_all("\\'", "'")}))
+            : (state.take_over_session && !state.?take_over.orValue(false) && !step.?took_over.orValue(false)) ?
+              dyn(step.with({"retry": true}))
+            :
+              dyn(
+                {
+                  "error": {
+                    "message": "GET /EventLog.asp: session_stuck: the modem accepted the login but still answers protected pages with the login page" + (step.unread ? ", and its login redirect could not be read so wrong credentials cannot be ruled out" : "") + "; power cycle the modem if this persists",
+                  },
+                }
+              )
+          )
+      )
+  ).as(step,
+    (has(step.error) || step.?retry.orValue(false)) ?
+      step
+    :
+      // Step 5: decode the docsDevEventTable rows. A single row decodes to a map
+      // rather than a list and an empty table decodes to a string.
+      try(step.xml.decode_xml(), "error").as(x,
+        has(x.error) ?
+          {"error": {"message": "GET /EventLog.asp: failed to decode event table: " + x.error}}
+        :
+          dyn(
+            {
+              "rows": (
+                (type(x.doc.docsDevEventTable) == map) ?
+                  [x.doc.docsDevEventTable.?tr.orValue([])].flatten()
+                :
+                  []
+              ).map(r,
+                {
+                  "index": r.?docsDevEvIndex.orValue(""),
+                  "first_time": r.?docsDevEvFirstTime.orValue(""),
+                  "last_time": r.?docsDevEvLastTime.orValue(""),
+                  "count": r.?docsDevEvCounts.orValue(""),
+                  "level": r.?docsDevEvLevel.orValue(""),
+                  "id": r.?docsDevEvId.orValue(""),
+                  "text": r.?docsDevEvText.orValue(""),
+                }
+              ),
+            }
+          )
+      )
+  ).as(step,
+    state.with(
+      has(step.error) ?
+        {"events": {"error": step.error}, "take_over": false, "want_more": false}
+      : step.?retry.orValue(false) ?
+        {"events": [{"retry": true}], "take_over": true, "want_more": true}
+      : (size(step.rows) == 0) ?
+        {"events": [], "take_over": false, "want_more": false}
+      :
+        // Step 6: rows are aggregated in place (count and last time bump), so
+        // emit every row last seen at or after the newest last time from the
+        // previous poll. Timestamps are "YYYY-MM-DD, HH:MM:SS" and compare
+        // correctly as strings. If the newest row is older than the cursor, the
+        // log was cleared or the modem clock was reset: emit everything.
+        //
+        // Rows the modem logged before it had learned the time carry the
+        // literal "Time Not Established" in place of a timestamp. That text
+        // sorts above every real timestamp, so letting it reach the cursor
+        // would park the cursor above all dated rows and stop the stream from
+        // ever emitting a new event again. Undated rows are kept out of the
+        // cursor and emitted whenever the set of them changes, which is what
+        // happens when the modem reboots or one of them recurs; the ingest
+        // pipeline gives every row a deduplicating _id, so a row that is sent
+        // twice is written over itself.
+        {
+          "dated": step.rows.filter(r, r.last_time.matches("^[0-9]")),
+          "undated": step.rows.filter(r, !r.last_time.matches("^[0-9]")),
+          "since": state.?cursor.last_time.orValue(""),
+        }.as(c,
+          {
+            "newest": (size(c.dated) != 0) ? c.dated.map(r, r.last_time).max() : c.since,
+            // Keyed on the values that identify an occurrence, which is what
+            // the pipeline fingerprints a document id from. The row index is
+            // left out on purpose: the modem renumbers rows as the table
+            // grows, and that is not a new occurrence.
+            "undated_key": c.undated.map(r, [r.id, r.count, r.text]).encode_json(),
+          }.as(n,
+            {
+              "events": (
+                c.undated.filter(r,
+                  n.undated_key != state.?cursor.undated_key.orValue("")
+                ) + c.dated.filter(r,
+                  n.newest < c.since || r.last_time >= c.since
+                )
+              ).map(r, {"message": r.encode_json()}),
+              "cursor": {"last_time": n.newest, "undated_key": n.undated_key},
+              "take_over": false,
+              "want_more": false,
+            }
+          )
+        )
+    )
+  )
+{{#if tz_offset}}
+fields_under_root: true
+fields:
+  _conf:
+    tz_offset: "{{tz_offset}}"
+{{/if}}
+tags:
+{{#if preserve_original_event}}
+  - preserve_original_event
+{{/if}}
+{{#each tags as |tag|}}
+  - {{tag}}
+{{/each}}
+{{#contains "forwarded" tags}}
+publisher_pipeline.disable_host: true
+{{/contains}}
+processors:
+- drop_event.when.equals.retry: true
+{{#if processors}}
+{{processors}}
+{{/if}}

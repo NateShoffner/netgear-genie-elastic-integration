@@ -1,0 +1,27 @@
+wait_for_data_timeout: 1m
+input: cel
+service: netgear_genie-status
+vars:
+  url: http://{{Hostname}}:{{Port}}
+  username: admin
+  password: test-password
+data_stream:
+  vars:
+    # The stream writes exactly one document per poll, so the interval is kept
+    # longer than the test window to collect exactly one of them.
+    interval: 10m
+    take_over_session: true
+    preserve_original_event: true
+assert:
+  hit_count: 1
+  # hit_count on its own cannot tell a healthy poll from a total collection
+  # failure: the stream writes exactly one document either way, and a poll that
+  # never got past the login still writes one with web_ui.state set to
+  # unreachable, http_error, auth_failed, session_conflict or session_stuck.
+  # The fields below are only written when the login succeeded and both modem
+  # pages were parsed, so a degraded health-only document fails the test.
+  fields_present:
+    - netgear_genie.status.web_ui.response_time_ms
+    - netgear_genie.status.startup_procedure.boot_state.status
+    - netgear_genie.status.uptime_seconds
+    - observer.serial_number

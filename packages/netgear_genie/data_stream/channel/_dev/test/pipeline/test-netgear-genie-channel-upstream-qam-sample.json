@@ -1,0 +1,13 @@
+{
+    "events": [
+        {
+            "message": "{\"channel\":\"1\",\"channel_id\":\"17\",\"frequency\":\"16400000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"ATDMA\",\"modulation_type\":\"sc_qam\",\"power\":\"47.5 dBmV\",\"type\":\"upstream\"}"
+        },
+        {
+            "message": "{\"channel\":\"4\",\"channel_id\":\"20\",\"frequency\":\"35600000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"ATDMA\",\"modulation_type\":\"sc_qam\",\"power\":\"47.0 dBmV\",\"type\":\"upstream\"}"
+        },
+        {
+            "message": "{\"channel\":\"5\",\"channel_id\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation\":\"Unknown\",\"modulation_type\":\"sc_qam\",\"power\":\"0.0 dBmV\",\"type\":\"upstream\"}"
+        }
+    ]
+}

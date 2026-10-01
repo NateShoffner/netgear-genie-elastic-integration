@@ -1,0 +1,7 @@
+{
+    "events": [
+        {
+            "message": "{\"web_ui\":{\"login_ok\":false,\"reachable\":true,\"reason\":\"POST /goform/GenieLogin: another device is logged in to the modem's web interface and the modem allows only one session at a time\",\"state\":\"session_conflict\"}}"
+        }
+    ]
+}

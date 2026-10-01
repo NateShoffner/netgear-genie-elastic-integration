@@ -1,0 +1,526 @@
+rules:
+  # Healthy modem, reached through the bare base URL, which is what the system
+  # test configures. Step 1: login page carrying the one-time webToken
+  # (unquoted digits) and the SessionID cookie the V10.01.07 firmware sets.
+  - path: /GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <title>NETGEAR Modem CM1000v2</title>
+          </head>
+          <body>
+              <form id="target"  name="login" method="POST" action="/goform/GenieLogin">
+                  <input type="text" name="loginUsername" size="18" maxlength="32" value="">
+                  <input type="password" name="loginPassword" size="18" maxlength="32" value="">
+                  <button id="apply" value="1" type="SUBMIT" name="login" class="button-apply">Login</button>
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  # Step 2a: correct credentials and token. The modem answers with a 302 to
+  # /GenieIndex.asp. The form body is merged into the query by the mock.
+  # The redirect carries a short HTML body, which is what the modem's own
+  # HTTP/1.0 redirects do. Once the client has followed such a redirect the
+  # body can no longer be read, the request fails with "read on closed response
+  # body" and the collector never sees where the login landed, so it assumes
+  # the login worked and lets the status page decide. That is the path a real
+  # modem takes, so the default test credentials take it too.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: admin
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: '<html><body>Redirect</body></html>'
+  # Step 2b: a successful login whose redirect carries no body. Nothing is left
+  # unread, so the redirect is followed through and the collector reads the
+  # landing page from the final request URL. Selected with the `bodyless-user`
+  # name. The two rules below are bodyless for the same reason: they are told
+  # apart by the page the login lands on, and a body-carrying redirect hides
+  # that page, which is the limitation the `admin` rule above models.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: bodyless-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Step 2c: another device already holds the single session, so the modem
+  # sends the login to /MultiLogin.asp. Selected with the `busy-user` name.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: busy-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/MultiLogin.asp'
+        body: ''
+  # Step 2d: any other login attempt (bad credentials or stale token) is sent
+  # back to the login page.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieLogin.asp'
+        body: ''
+  # Session takeover page, reached when another device holds the session. It
+  # carries both a fresh webToken and the RetailSessionId to hand back.
+  - path: /MultiLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form method="POST" action="/goform/MultiLogin">
+                  You are currently logged in from another device. There can be only one device logged in at a time.
+                  <input type="hidden" name="RetailSessionId" value="987654321" />
+                  <input type="hidden" name="webToken" value=1234567890 />
+                  <input type="hidden" name="Act" value="yes" />
+                  <button id="yes" value="yes" type="SUBMIT" name="yes" class="button-apply">Yes</button>
+              </form>
+          </body>
+          </html>
+  # Session takeover. The modem drops the other device's session and lands on
+  # the Genie index page.
+  - path: /goform/MultiLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Redirect target of a successful login or session takeover.
+  - path: /GenieIndex.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><head><title>NETGEAR Modem CM1000v2</title></head><body></body></html>
+  # Step 3: the DOCSIS status page, served only when the session cookie is sent
+  # back. Only the startup procedure table and the two clock cells matter to
+  # this data stream, so the channel tables are left out of the mock. The
+  # JavaScript tagValueList on this page is a stale hard-coded placeholder and
+  # the configuration file row sits in a hidden row with an HTML comment.
+  - path: /DocsisStatus.asp
+    methods: ['GET']
+    request_headers:
+      Cookie:
+        - 'SessionID=1234567890'
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+              <head>
+                  <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+                  <meta name="description" content='CM1000v2'>
+                  <title>NETGEAR Modem CM1000v2</title>
+                  <script language="javascript" type="text/javascript">
+                      function InitTagValue()
+                      {
+                          // Stale hard-coded placeholders, not the live data.
+                          var tagValueList = '453000000|Locked|OK|Operational|OK|Operational|OK|CM.cfg|Disabled|Disabled|Mon Jun 11 15:30:50 2012|0|';
+                          return tagValueList.split("|");
+                      }
+                  </script>
+              </head>
+              <body class="page-body">
+                  <table>
+                      <tr><td colspan="2"><b><tabindex=-1>Startup Procedure</tabindex=-1></b></td></tr>
+                      <tr><td>
+                          <table id="startup_procedure_table" name="Startup_Procedure" border="1" cellpadding="2" cellspacing="0" class="TableStyle">
+                              <tr>
+                                  <td><span class="thead"><b>Procedure</b></span></td>
+                                  <td><span class="thead"><b>Status</b></span></td>
+                                  <td><span class="thead"><b>Comment</b></span></td>
+                              </tr>
+                              <tr>
+                                  <td class="style1">Acquire Downstream Channel</td>
+                                  <td>801000000 Hz</td>
+                                  <td>Locked</td>
+                              </tr>
+                              <tr>
+                                  <td class="style1">Connectivity State</td>
+                                  <td>OK</td>
+                                  <td>Operational</td>
+                              </tr>
+                              <tr>
+                                  <td class="style1">Boot State</td>
+                                  <td>OK</td>
+                                  <td>Operational</td>
+                              </tr>
+                              <tr style="display:none"><!-- Hidden config file field -->
+                                  <td class="style1">Configuration File</td>
+                                  <td>OK</td>
+                                  <td>d11_m_cm1000v2_subnxgig_c01.cm</td>
+                              </tr>
+                              <tr>
+                                  <td class="style1">Security</td>
+                                  <td>Enable</td>
+                                  <td>BPI+</td>
+                              </tr>
+                              <tr>
+                                  <td class="style1">IP Provisioning Mode</td>
+                                  <td>Honor MDD</td>
+                                  <td>IPv6 only</td>
+                              </tr>
+                          </table>
+                      </td></tr>
+                      <tr>
+                          <td id="Current_systemtime" name="CurrentSystemTime"><font face="Helvetica" size="2"><b>Current System Time:&nbsp;</b>Tue Sep 22 00:16:13 2026
+          </font><br></td>
+                      </tr>
+                      <tr>
+                          <td id="SystemUpTime" name="SystemUpTime"><font face="Helvetica" size="2"><b>System Up Time:&nbsp;</b>602:49:09</font><br></td>
+                      </tr>
+                  </table>
+              </body>
+          </html>
+  # Any request for a protected page without the session cookie gets the
+  # 613-byte login-redirect stub, which is also what a modem with a wedged web
+  # server returns after an apparently successful login.
+  - path: /DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <META http-equiv="Content-Style-Type" content="text/css">
+              <META http-equiv="Pragma" content="no-cache">
+              <META HTTP-equiv="Cache-Control" content="no-cache">
+              <META HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT">
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # Step 4: the router status page. The first tagValueList assignment is the
+  # live one; the second, inside a /* */ block, is a hard-coded placeholder in
+  # double quotes.
+  - path: /RouterStatus.asp
+    methods: ['GET']
+    request_headers:
+      Cookie:
+        - 'SessionID=1234567890'
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+              <head>
+                  <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+                  <meta name="description" content='CM1000v2'>
+                  <title>NETGEAR Modem CM1000v2</title>
+                  <script language="javascript" type="text/javascript">
+                      function InitTagValue()
+                      {
+                          /*
+                            Hardware Version (td) | Firmware Version (td) | CableModem Serial Number (td) | CM certificate | Cable MAC Address | Cable IP Mask |
+                            Cable Gateway | Cable DNS | Network Access | Internet Mac address (td) | Internet IP Mask (td) |
+                            DHCP (td) | Internet Gateway | Internet Domain Name Server (td) | LAN Mac address (td) | LAN IP Mask (td)
+                          */
+                          var tagValueList = '2.02|V10.01.07|5AB12345C6789|Installed|00:00:5e:00:53:01||'+
+                                             '192.0.2.1|---.---.---.---, ---.---.---.---, ---.---.---.---|Allowed|0|00<br>|'+
+                                             '0|0<br>|0, 0, 0<br>, , |00:00:5E:00:53:03|0.0.0.0/0<br>|';
+                          /*
+                              var tagValueList = "v1.0|v0.1|12345678|None" +
+                                          "|00:11:22:33:44:55|10.204.1.13/24|192.0.2.1|192.0.2.53, 192.0.2.54|Enable" ;
+                          */
+                          return tagValueList.split("|");
+                      }
+                  </script>
+              </head>
+              <body class="page-body">
+                  <table>
+                      <tr><td>Hardware Version</td><td id="HardwareVersion"></td></tr>
+                      <tr><td>Firmware Version</td><td id="FirmwareVersion"></td></tr>
+                  </table>
+              </body>
+          </html>
+  # The router status page without a session cookie is the same stub.
+  - path: /RouterStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # Wedged web server, selected with a `/stuck` base URL: the login succeeds but
+  # every protected page keeps answering with the login-redirect stub, including
+  # after a session takeover.
+  - path: /stuck/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form id="target" name="login" method="POST" action="/goform/GenieLogin">
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  # `bodyless-user` gets a redirect with no body, so the login is known to have
+  # been accepted and the stuck report does not have to hedge about the
+  # credentials.
+  - path: /stuck/goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: bodyless-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Every other login gets the body-carrying redirect the real modem sends, so
+  # the collector cannot tell whether the credentials were accepted and says so
+  # in the stuck report.
+  - path: /stuck/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: '<html><body>Redirect</body></html>'
+  - path: /stuck/MultiLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form method="POST" action="/goform/MultiLogin">
+                  You are currently logged in from another device. There can be only one device logged in at a time.
+                  <input type="hidden" name="RetailSessionId" value="987654321" />
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  - path: /stuck/goform/MultiLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /stuck/DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <META http-equiv="Content-Style-Type" content="text/css">
+              <META http-equiv="Pragma" content="no-cache">
+              <META HTTP-equiv="Cache-Control" content="no-cache">
+              <META HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT">
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # The status page answers with an unexpected HTTP status, selected with a
+  # `/httperr` base URL.
+  - path: /httperr/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><body><form><input type="hidden" name="webToken" value=1234567890 /></form></body></html>
+  # Bodyless redirect so this scenario isolates the page error from the login.
+  - path: /httperr/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /httperr/DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 503
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: '<html><body>Service Unavailable</body></html>'
+  # The DOCSIS status page is collected but the device identity page fails, so
+  # the poll still reports `ok` with the device fields missing. Selected with a
+  # `/norouter` base URL.
+  - path: /norouter/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><body><form><input type="hidden" name="webToken" value=1234567890 /></form></body></html>
+  # Bodyless redirect so this scenario isolates the device page from the login.
+  - path: /norouter/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /norouter/DocsisStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+              <head><title>NETGEAR Modem CM1000v2</title></head>
+              <body class="page-body">
+                  <table>
+                      <tr><td>
+                          <table id="startup_procedure_table" name="Startup_Procedure" border="1" cellpadding="2" cellspacing="0" class="TableStyle">
+                              <tr>
+                                  <td><span class="thead"><b>Procedure</b></span></td>
+                                  <td><span class="thead"><b>Status</b></span></td>
+                                  <td><span class="thead"><b>Comment</b></span></td>
+                              </tr>
+                              <tr><td class="style1">Acquire Downstream Channel</td><td>801000000 Hz</td><td>Locked</td></tr>
+                              <tr><td class="style1">Connectivity State</td><td>OK</td><td>Operational</td></tr>
+                              <tr><td class="style1">Boot State</td><td>OK</td><td>Operational</td></tr>
+                              <tr style="display:none"><!-- Hidden config file field -->
+                                  <td class="style1">Configuration File</td><td>OK</td><td>d11_m_cm1000v2_subnxgig_c01.cm</td>
+                              </tr>
+                              <tr><td class="style1">Security</td><td>Enable</td><td>BPI+</td></tr>
+                              <tr><td class="style1">IP Provisioning Mode</td><td>Honor MDD</td><td>IPv6 only</td></tr>
+                          </table>
+                      </td></tr>
+                      <tr>
+                          <td id="Current_systemtime" name="CurrentSystemTime"><font face="Helvetica" size="2"><b>Current System Time:&nbsp;</b>Tue Sep 22 00:16:13 2026
+          </font><br></td>
+                      </tr>
+                      <tr>
+                          <td id="SystemUpTime" name="SystemUpTime"><font face="Helvetica" size="2"><b>System Up Time:&nbsp;</b>602:49:09</font><br></td>
+                      </tr>
+                  </table>
+              </body>
+          </html>
+  - path: /norouter/RouterStatus.asp
+    methods: ['GET']
+    responses:
+      - status_code: 500
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: '<html><body>Internal Server Error</body></html>'

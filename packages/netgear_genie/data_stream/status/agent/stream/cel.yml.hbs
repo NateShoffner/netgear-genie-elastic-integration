@@ -1,0 +1,421 @@
+interval: {{interval}}
+resource.tracer:
+  enabled: {{enable_request_tracer}}
+  filename: "../../logs/cel/http-request-trace-*.ndjson"
+  maxbackups: 5
+{{#if http_client_timeout}}
+resource.timeout: {{http_client_timeout}}
+{{/if}}
+# resource.redirect.max_redirects is deliberately not set, so redirects are
+# followed up to the input's default of 10. The modem answers the login form
+# with a redirect and the page it lands on is what says whether the login was
+# accepted, so the redirect has to be followed for the program to see it.
+# Setting max_redirects to 0 does not hand the unfollowed redirect back to the
+# program: the CEL input refuses the first redirect and the request fails with
+# "stopped after 0 redirects", leaving neither a Location header nor a landing
+# page to read.
+resource.url: {{url}}
+state:
+  username: {{escape_string username}}
+  password: {{escape_string password}}
+  take_over_session: {{take_over_session}}
+redact:
+  fields:
+    - password
+regexp:
+  web_token: 'name=\x22?webToken\x22?\s*value=\x22?(\d+)'
+  retail_session_id: 'name=\x22?RetailSessionId\x22?[^>]*?value=\x22?([^\x22\s/>]*)'
+  startup_table: '(?s)id="startup_procedure_table"[^>]*>(.*?)</table>'
+  table_row: '(?s)<tr[^>]*>(.*?)</tr>'
+  table_cell: '(?s)<td[^>]*>(.*?)</td>'
+  current_system_time: '(?s)id="Current_systemtime"[^>]*>.*?</b>\s*(.*?)\s*</font>'
+  system_uptime: '(?s)id="SystemUpTime"[^>]*>.*?</b>\s*(.*?)\s*</font>'
+  tag_value_list: '(?s)var\s+tagValueList\s*=\s*(\x27.*?\x27)\s*;'
+  tag_value_chunk: '\x27([^\x27]*)\x27'
+program: |-
+  state.with(
+    // Step 1: fetch the login page, scrape the one-time webToken and keep the
+    // SessionID cookie the modem's web server sets.
+    try(get(state.url.trim_right("/") + "/GenieLogin.asp"), "error").as(resp,
+      has(resp.error) ?
+        dyn(
+          {
+            "fail": {
+              "state": "unreachable",
+              "reachable": false,
+              "login_ok": false,
+              "reason": "GET /GenieLogin.asp: " + resp.error,
+            },
+          }
+        )
+      : (resp.StatusCode != 200) ?
+        dyn(
+          {
+            "fail": {
+              "state": "http_error",
+              "reachable": true,
+              "login_ok": false,
+              "reason": "GET /GenieLogin.asp returned " + string(resp.Status),
+            },
+          }
+        )
+      :
+        dyn(string(resp.Body).re_find_submatch("web_token")).as(m,
+          (size(m) != 2) ?
+            dyn(
+              {
+                "fail": {
+                  "state": "http_error",
+                  "reachable": true,
+                  "login_ok": false,
+                  "reason": "GET /GenieLogin.asp: the page returned by the modem is not the login page, it carries no webToken",
+                },
+              }
+            )
+          :
+            dyn(
+              {
+                "token": m[1],
+                "hdr": {
+                  ?"Cookie": resp.Header[?"Set-Cookie"].optMap(c, [c[0].split(";")[0]]),
+                },
+              }
+            )
+        )
+    ).as(step,
+      has(step.fail) ?
+        step
+      :
+        // Step 2: log in. The modem answers with a 302 to /GenieIndex.asp on
+        // success, to /GenieLogin.asp or /Index.asp on bad credentials and to
+        // /MultiLogin.asp when another device already holds the single session.
+        // The redirect is followed, so the outcome is read from the path the
+        // final request landed on. A redirect that was answered but not
+        // followed still carries its Location header, which is read instead.
+        // The modem's HTTP/1.0 redirect carries a short body that the client
+        // can no longer read once it has moved on to the redirect target, which
+        // fails the request without a landing page; the login outcome is then
+        // unknown and the status page has to decide.
+        try(
+          post_request(
+            state.url.trim_right("/") + "/goform/GenieLogin",
+            "application/x-www-form-urlencoded",
+            {"loginUsername": [state.username]}.format_query() + "&" + {"loginPassword": [state.password]}.format_query() + "&login=1&webToken=" + step.token
+          ).with(
+            {
+              "Header": step.hdr.with({"Content-Type": ["application/x-www-form-urlencoded"]}),
+            }
+          ).do_request(),
+          "error"
+        ).as(resp,
+          !has(resp.error) ?
+            {
+              "dest": (resp.StatusCode >= 300 && resp.StatusCode < 400) ?
+                resp.Header.?Location[0].orValue("")
+              :
+                resp.Request.URL.parse_url().Path,
+              "unread": false,
+            }
+          : resp.error.contains("read on closed response body") ?
+            {"dest": "/GenieIndex.asp", "unread": true}
+          :
+            {"dest": "", "unread": false, "unreachable": resp.error}
+        ).as(login,
+          has(login.unreachable) ?
+            dyn(
+              {
+                "fail": {
+                  "state": "unreachable",
+                  "reachable": false,
+                  "login_ok": false,
+                  "reason": "POST /goform/GenieLogin: " + login.unreachable,
+                },
+              }
+            )
+          : login.dest.contains("MultiLogin.asp") ?
+            dyn(step.with({"multi": true, "unread": false}))
+          : login.dest.contains("GenieIndex.asp") ?
+            dyn(step.with({"multi": false, "unread": login.unread}))
+          :
+            dyn(
+              {
+                "fail": {
+                  "state": "auth_failed",
+                  "reachable": true,
+                  "login_ok": false,
+                  "reason": "POST /goform/GenieLogin: the modem sent the login back to " + login.dest + ", check the username and password",
+                },
+              }
+            )
+        )
+    ).as(step,
+      (has(step.fail) || !(step.multi || state.?take_over.orValue(false))) ?
+        step
+      : !state.take_over_session ?
+        {
+          "fail": {
+            "state": "session_conflict",
+            "reachable": true,
+            "login_ok": false,
+            "reason": "POST /goform/GenieLogin: another device is logged in to the modem's web interface and the modem allows only one session at a time",
+          },
+        }
+      :
+        // Step 3: another device holds the single session, or the last poll saw
+        // the login-redirect stub, so take the session over. The takeover page
+        // carries its own webToken and the session id to hand back.
+        try(request("GET", state.url.trim_right("/") + "/MultiLogin.asp").with({"Header": step.hdr}).do_request(), "error").as(resp,
+          has(resp.error) ?
+            dyn(
+              {
+                "fail": {
+                  "state": "unreachable",
+                  "reachable": false,
+                  "login_ok": false,
+                  "reason": "GET /MultiLogin.asp: " + resp.error,
+                },
+              }
+            )
+          : (resp.StatusCode != 200) ?
+            dyn(
+              {
+                "fail": {
+                  "state": "http_error",
+                  "reachable": true,
+                  "login_ok": false,
+                  "reason": "GET /MultiLogin.asp returned " + string(resp.Status),
+                },
+              }
+            )
+          :
+            dyn(
+              {
+                "token": dyn(string(resp.Body).re_find_submatch("web_token")),
+                "session": dyn(string(resp.Body).re_find_submatch("retail_session_id")),
+              }
+            ).as(m,
+              (size(m.token) != 2) ?
+                dyn(
+                  {
+                    "fail": {
+                      "state": "http_error",
+                      "reachable": true,
+                      "login_ok": false,
+                      "reason": "GET /MultiLogin.asp: the session takeover page carries no webToken",
+                    },
+                  }
+                )
+              :
+                try(
+                  post_request(
+                    state.url.trim_right("/") + "/goform/MultiLogin",
+                    "application/x-www-form-urlencoded",
+                    "yes=yes&Act=yes&RetailSessionId=" + ((size(m.session) == 2) ? string(m.session[1]) : "") + "&webToken=" + string(m.token[1])
+                  ).with(
+                    {
+                      "Header": step.hdr.with({"Content-Type": ["application/x-www-form-urlencoded"]}),
+                    }
+                  ).do_request(),
+                  "error"
+                ).as(resp,
+                  (has(resp.error) && !resp.error.contains("read on closed response body")) ?
+                    dyn(
+                      {
+                        "fail": {
+                          "state": "unreachable",
+                          "reachable": false,
+                          "login_ok": false,
+                          "reason": "POST /goform/MultiLogin: " + resp.error,
+                        },
+                      }
+                    )
+                  :
+                    dyn(step.with({"took_over": true}))
+                )
+            )
+        )
+    ).as(step,
+      // The bound value of a step is only evaluated when the next step first
+      // reads it, which is just before the status page is requested, so this is
+      // where the clock for the status page round trip starts.
+      has(step.fail) ?
+        step
+      :
+        step.with({"t0": now()})
+    ).as(step,
+      has(step.fail) ?
+        step
+      :
+        // Step 4: fetch the DOCSIS status page. An unauthenticated session, or a
+        // modem whose web server is wedged, answers with a short stub that
+        // redirects back to the login page instead of the status tables.
+        try(request("GET", state.url.trim_right("/") + "/DocsisStatus.asp").with({"Header": step.hdr}).do_request(), "error").as(resp,
+          has(resp.error) ?
+            dyn(
+              {
+                "fail": {
+                  "state": "unreachable",
+                  "reachable": false,
+                  "login_ok": true,
+                  "reason": "GET /DocsisStatus.asp: " + resp.error,
+                },
+              }
+            )
+          : (resp.StatusCode != 200) ?
+            dyn(
+              {
+                "fail": {
+                  "state": "http_error",
+                  "reachable": true,
+                  "login_ok": true,
+                  "response_time_ms": int((now() - step.t0).getMilliseconds()),
+                  "reason": "GET /DocsisStatus.asp returned " + string(resp.Status),
+                },
+              }
+            )
+          :
+            dyn(
+              step.with(
+                {
+                  "page": string(resp.Body),
+                  "response_time_ms": int((now() - step.t0).getMilliseconds()),
+                }
+              )
+            )
+        )
+    ).as(step,
+      has(step.fail) ?
+        step
+      :
+        // Step 5: locate the startup procedure table. When it is missing the
+        // page is the login-redirect stub: another device may have taken the
+        // session between the login and this request, so take the session over
+        // and re-evaluate once before reporting the modem as stuck.
+        dyn(step.page.re_find_submatch("startup_table")).as(m,
+          (size(m) == 2) ?
+            dyn(step.with({"table": string(m[1])}))
+          : (state.take_over_session && !state.?take_over.orValue(false) && !step.?took_over.orValue(false)) ?
+            dyn(step.with({"retry": true}))
+          :
+            dyn(
+              {
+                "fail": {
+                  "state": "session_stuck",
+                  "reachable": true,
+                  "login_ok": true,
+                  "response_time_ms": step.response_time_ms,
+                  "reason": "GET /DocsisStatus.asp: the modem accepted the login but still answers protected pages with the login page" + (step.unread ? ", and its login redirect could not be read so wrong credentials cannot be ruled out" : "") + "; power cycle the modem if this persists",
+                },
+              }
+            )
+        )
+    ).as(step,
+      (has(step.fail) || step.?retry.orValue(false)) ?
+        step
+      :
+        // Step 6: the device identity page. This is a second page fetch and a
+        // failure here does not invalidate the DOCSIS status that was already
+        // collected, so the poll still reports ok with the device fields left
+        // out and the reason noting why.
+        try(request("GET", state.url.trim_right("/") + "/RouterStatus.asp").with({"Header": step.hdr}).do_request(), "error").as(resp,
+          has(resp.error) ?
+            dyn(step.with({"device_error": "GET /RouterStatus.asp: " + resp.error}))
+          : (resp.StatusCode != 200) ?
+            dyn(step.with({"device_error": "GET /RouterStatus.asp returned " + string(resp.Status)}))
+          :
+            // The first tagValueList assignment on this page is the live one and
+            // is a multi-line concatenation of single quoted chunks; the second,
+            // inside a block comment, is a hard-coded placeholder in double
+            // quotes and is never matched.
+            dyn(string(resp.Body).re_find_submatch("tag_value_list")).as(m,
+              (size(m) != 2) ?
+                dyn(step.with({"device_error": "GET /RouterStatus.asp: the page carries no tagValueList"}))
+              :
+                dyn(string(m[1]).re_find_all_submatch("tag_value_chunk")).map(c, string(c[1])).join("").split("|").as(v,
+                  (size(v) < 5) ?
+                    dyn(step.with({"device_error": "GET /RouterStatus.asp: the tagValueList holds " + string(size(v)) + " values, expected at least 5"}))
+                  :
+                    dyn(step.with({"values": v}))
+                )
+            )
+        )
+    ).as(step,
+      state.with(
+        has(step.fail) ?
+          {
+            "events": [{"message": {"web_ui": step.fail}.encode_json()}],
+            "take_over": false,
+            "want_more": false,
+          }
+        : step.?retry.orValue(false) ?
+          {"events": [{"retry": true}], "take_over": true, "want_more": true}
+        :
+          // Step 7: one document per poll carrying the collection outcome, the
+          // startup procedure rows and the device identity. Values are kept as
+          // the modem renders them.
+          step.table.re_find_all_submatch("table_row").map(r,
+            dyn(string(r[1]).re_find_all_submatch("table_cell")).map(c, string(c[1]).trim(" \t\r\n"))
+          ).filter(r, size(r) >= 3).as(rows,
+            rows.map(r, r[0]).zip(rows.map(r, {"status": r[1], "comment": r[2]})).as(procedure,
+              {
+                "events": [
+                  {
+                    "message": {
+                      "web_ui": {
+                        "state": "ok",
+                        "reachable": true,
+                        "login_ok": true,
+                        "response_time_ms": step.response_time_ms,
+                        "reason": (step.?device_error.optMap(e, "the DOCSIS status page was collected but the device identity page could not be read: " + e)).orValue("the modem web interface responded and the status page was collected"),
+                      },
+                      "startup_procedure": {
+                        ?"acquire_downstream_channel": procedure[?"Acquire Downstream Channel"],
+                        ?"connectivity_state": procedure[?"Connectivity State"],
+                        ?"boot_state": procedure[?"Boot State"],
+                        ?"configuration_file": procedure[?"Configuration File"],
+                        ?"security": procedure[?"Security"],
+                        ?"ip_provisioning_mode": procedure[?"IP Provisioning Mode"],
+                      },
+                      ?"current_system_time": step.page.re_find_submatch("current_system_time")[?1].optMap(t, string(t)),
+                      ?"system_uptime": step.page.re_find_submatch("system_uptime")[?1].optMap(u, string(u)),
+                      ?"device": step.?values.optMap(v,
+                        {
+                          "hardware_version": v[0],
+                          "firmware_version": v[1],
+                          "serial_number": v[2],
+                          "cm_certificate": v[3],
+                          "cable_mac": v[4],
+                        }
+                      ),
+                    }.encode_json(),
+                  },
+                ],
+                "take_over": false,
+                "want_more": false,
+              }
+            )
+          )
+      )
+    )
+  )
+{{#if tz_offset}}
+fields_under_root: true
+fields:
+  _conf:
+    tz_offset: "{{tz_offset}}"
+{{/if}}
+tags:
+{{#if preserve_original_event}}
+  - preserve_original_event
+{{/if}}
+{{#each tags as |tag|}}
+  - {{tag}}
+{{/each}}
+{{#contains "forwarded" tags}}
+publisher_pipeline.disable_host: true
+{{/contains}}
+processors:
+- drop_event.when.equals.retry: true
+{{#if processors}}
+{{processors}}
+{{/if}}

@@ -1,0 +1,16 @@
+{
+    "events": [
+        {
+            "message": "{\"channel\":\"1\",\"channel_id\":\"25\",\"correctable_codewords\":\"529\",\"frequency\":\"801000000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"QAM256\",\"modulation_type\":\"sc_qam\",\"power\":\"-4.9 dBmV\",\"snr\":\"42.3 dB\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"1334\",\"unerrored_codewords\":\"4077504903\"}"
+        },
+        {
+            "message": "{\"channel\":\"2\",\"channel_id\":\"1\",\"correctable_codewords\":\"380\",\"frequency\":\"387000000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"QAM256\",\"modulation_type\":\"sc_qam\",\"power\":\"-2.3 dBmV\",\"snr\":\"43.9 dB\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"1648\",\"unerrored_codewords\":\"4052234385\"}"
+        },
+        {
+            "message": "{\"channel\":\"28\",\"channel_id\":\"28\",\"correctable_codewords\":\"527\",\"frequency\":\"819000000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"QAM256\",\"modulation_type\":\"sc_qam\",\"power\":\"-4.7 dBmV\",\"snr\":\"42.3 dB\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"2647\",\"unerrored_codewords\":\"4079801453\"}"
+        },
+        {
+            "message": "{\"channel\":\"29\",\"channel_id\":\"0\",\"correctable_codewords\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation\":\"Unknown\",\"modulation_type\":\"sc_qam\",\"power\":\"0.0 dBmV\",\"snr\":\"0.0 dB\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"0\",\"unerrored_codewords\":\"0\"}"
+        }
+    ]
+}

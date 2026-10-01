@@ -1,0 +1,1978 @@
+{
+    "attributes": {
+        "controlGroupInput": {
+            "chainingSystem": "HIERARCHICAL",
+            "controlStyle": "oneLine",
+            "ignoreParentSettingsJSON": {
+                "ignoreFilters": false,
+                "ignoreQuery": false,
+                "ignoreTimerange": false,
+                "ignoreValidations": false
+            },
+            "panelsJSON": {
+                "0f946b83-5b57-5d94-803d-0fd2707a23fb": {
+                    "explicitInput": {
+                        "dataViewId": "metrics-*",
+                        "enhancements": {},
+                        "exclude": false,
+                        "existsSelected": false,
+                        "fieldName": "agent.name",
+                        "hideExclude": false,
+                        "hideExists": false,
+                        "id": "0f946b83-5b57-5d94-803d-0fd2707a23fb",
+                        "searchTechnique": "prefix",
+                        "selectedOptions": [],
+                        "singleSelect": false,
+                        "title": "Collecting agent"
+                    },
+                    "grow": true,
+                    "order": 0,
+                    "type": "optionsListControl",
+                    "width": "medium"
+                },
+                "849d0ec6-4dbf-5e70-8fbd-5f25e16a0dda": {
+                    "explicitInput": {
+                        "dataViewId": "metrics-*",
+                        "enhancements": {},
+                        "exclude": false,
+                        "existsSelected": false,
+                        "fieldName": "data_stream.namespace",
+                        "hideExclude": false,
+                        "hideExists": false,
+                        "id": "849d0ec6-4dbf-5e70-8fbd-5f25e16a0dda",
+                        "searchTechnique": "prefix",
+                        "selectedOptions": [],
+                        "singleSelect": false,
+                        "title": "Namespace"
+                    },
+                    "grow": true,
+                    "order": 1,
+                    "type": "optionsListControl",
+                    "width": "medium"
+                }
+            },
+            "showApplySelections": false
+        },
+        "description": "Availability of the NETGEAR cable modem's Genie web interface, the DOCSIS startup procedure, modem uptime and the modem event log. Start here, then open [NETGEAR Genie] DOCSIS channels to look at the individual bonded channels.",
+        "kibanaSavedObjectMeta": {
+            "searchSourceJSON": {
+                "filter": [
+                    {
+                        "$state": {
+                            "store": "appState"
+                        },
+                        "meta": {
+                            "alias": null,
+                            "disabled": false,
+                            "index": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+                            "key": "data_stream.dataset",
+                            "negate": false,
+                            "params": [
+                                "netgear_genie.status",
+                                "netgear_genie.event_log"
+                            ],
+                            "type": "phrases"
+                        },
+                        "query": {
+                            "bool": {
+                                "minimum_should_match": 1,
+                                "should": [
+                                    {
+                                        "match_phrase": {
+                                            "data_stream.dataset": "netgear_genie.status"
+                                        }
+                                    },
+                                    {
+                                        "match_phrase": {
+                                            "data_stream.dataset": "netgear_genie.event_log"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "query": {
+                    "language": "kuery",
+                    "query": ""
+                }
+            }
+        },
+        "optionsJSON": {
+            "hidePanelTitles": false,
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "useMargins": true
+        },
+        "panelsJSON": [
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "layout": "horizontal",
+                        "links": [
+                            {
+                                "destinationRefName": "link_7d15f96d-393e-504b-83bf-771233f08653_dashboard",
+                                "id": "7d15f96d-393e-504b-83bf-771233f08653",
+                                "label": "Modem health overview",
+                                "options": {
+                                    "openInNewTab": false,
+                                    "useCurrentDateRange": true,
+                                    "useCurrentFilters": true
+                                },
+                                "order": 0,
+                                "type": "dashboardLink"
+                            },
+                            {
+                                "destinationRefName": "link_7477064a-7055-50e0-a8d2-b4e7f3f702aa_dashboard",
+                                "id": "7477064a-7055-50e0-a8d2-b4e7f3f702aa",
+                                "label": "DOCSIS channels",
+                                "options": {
+                                    "openInNewTab": false,
+                                    "useCurrentDateRange": true,
+                                    "useCurrentFilters": true
+                                },
+                                "order": 1,
+                                "type": "dashboardLink"
+                            }
+                        ]
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 4,
+                    "i": "nav",
+                    "w": 48,
+                    "x": 0,
+                    "y": 0
+                },
+                "panelIndex": "nav",
+                "title": "",
+                "type": "links"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Share of modem status polls that reached the Genie web interface and parsed the DOCSIS status page.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-avail",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-avail": {
+                                            "columnOrder": [
+                                                "av",
+                                                "avX0",
+                                                "avX1",
+                                                "avX2"
+                                            ],
+                                            "columns": {
+                                                "av": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Web interface availability",
+                                                    "operationType": "formula",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "percent",
+                                                            "params": {
+                                                                "decimals": 1
+                                                            }
+                                                        },
+                                                        "formula": "count(kql='event.outcome: \"success\"') / count()",
+                                                        "isFormulaBroken": false
+                                                    },
+                                                    "references": [
+                                                        "avX2"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "avX0": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "filter": {
+                                                        "language": "kuery",
+                                                        "query": "event.outcome: \"success\""
+                                                    },
+                                                    "isBucketed": false,
+                                                    "label": "Part of availability",
+                                                    "operationType": "count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "___records___"
+                                                },
+                                                "avX1": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of availability",
+                                                    "operationType": "count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "___records___"
+                                                },
+                                                "avX2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of availability",
+                                                    "operationType": "math",
+                                                    "params": {
+                                                        "tinymathAst": {
+                                                            "args": [
+                                                                "avX0",
+                                                                "avX1"
+                                                            ],
+                                                            "name": "divide",
+                                                            "type": "function"
+                                                        }
+                                                    },
+                                                    "references": [
+                                                        "avX0",
+                                                        "avX1"
+                                                    ],
+                                                    "scale": "ratio"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\""
+                            },
+                            "visualization": {
+                                "layerId": "l-avail",
+                                "layerType": "data",
+                                "metricAccessor": "av",
+                                "subtitle": "Polls that reached the modem"
+                            }
+                        },
+                        "title": "Web interface availability",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p1",
+                    "w": 12,
+                    "x": 0,
+                    "y": 4
+                },
+                "panelIndex": "p1",
+                "title": "Web interface availability",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Uptime reported by the modem on the most recent successful poll.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-uptime-metric",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-uptime-metric": {
+                                            "columnOrder": [
+                                                "up"
+                                            ],
+                                            "columns": {
+                                                "up": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Time since last reboot",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "duration",
+                                                            "params": {
+                                                                "formatOverride": true,
+                                                                "includeSpaceWithSuffix": true,
+                                                                "inputFormat": "seconds",
+                                                                "outputFormat": "humanizePrecise",
+                                                                "outputPrecision": 1,
+                                                                "useTimeFormat": false
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.status.uptime_seconds"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\""
+                            },
+                            "visualization": {
+                                "layerId": "l-uptime-metric",
+                                "layerType": "data",
+                                "metricAccessor": "up",
+                                "subtitle": "Modem uptime at the last poll"
+                            }
+                        },
+                        "title": "Time since last reboot",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p2",
+                    "w": 12,
+                    "x": 12,
+                    "y": 4
+                },
+                "panelIndex": "p2",
+                "title": "Time since last reboot",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Round trip time of the last DOCSIS status page request. Rising latency tends to precede the modem's web server wedging.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-rt-metric",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-rt-metric": {
+                                            "columnOrder": [
+                                                "rt"
+                                            ],
+                                            "columns": {
+                                                "rt": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Web interface response time",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 0,
+                                                                "suffix": " ms"
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.status.web_ui.response_time_ms"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\""
+                            },
+                            "visualization": {
+                                "layerId": "l-rt-metric",
+                                "layerType": "data",
+                                "metricAccessor": "rt",
+                                "subtitle": "Round trip of the DOCSIS status page"
+                            }
+                        },
+                        "title": "Web interface response time",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p3",
+                    "w": 12,
+                    "x": 24,
+                    "y": 4
+                },
+                "panelIndex": "p3",
+                "title": "Web interface response time",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Modem event log rows the modem marked critical, such as T3 and T4 timeouts and SYNC failures.",
+                        "references": [
+                            {
+                                "id": "logs-*",
+                                "name": "indexpattern-datasource-layer-l-crit",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-crit": {
+                                            "columnOrder": [
+                                                "cr"
+                                            ],
+                                            "columns": {
+                                                "cr": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "filter": {
+                                                        "language": "kuery",
+                                                        "query": "log.level: \"critical\""
+                                                    },
+                                                    "isBucketed": false,
+                                                    "label": "Critical events",
+                                                    "operationType": "count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "___records___"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.event_log\""
+                            },
+                            "visualization": {
+                                "layerId": "l-crit",
+                                "layerType": "data",
+                                "metricAccessor": "cr",
+                                "subtitle": "Critical rows in the modem event log"
+                            }
+                        },
+                        "title": "Critical events",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p4",
+                    "w": 12,
+                    "x": 36,
+                    "y": 4
+                },
+                "panelIndex": "p4",
+                "title": "Critical events",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "One bar per poll interval, broken down by the outcome the collector recorded: ok, unreachable, http_error, auth_failed, session_conflict or session_stuck.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-state",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-state": {
+                                            "columnOrder": [
+                                                "sx",
+                                                "sb",
+                                                "sy"
+                                            ],
+                                            "columns": {
+                                                "sb": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": true,
+                                                    "label": "Web interface state",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "columnId": "sy",
+                                                            "type": "column"
+                                                        },
+                                                        "orderDirection": "desc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 8
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.web_ui.state"
+                                                },
+                                                "sx": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "sy": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Polls",
+                                                    "operationType": "count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "___records___"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "sy"
+                                        ],
+                                        "layerId": "l-state",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "bar_stacked",
+                                        "showGridlines": false,
+                                        "splitAccessor": "sb",
+                                        "xAccessor": "sx"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "bar_stacked",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Web interface state over time",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p5",
+                    "w": 24,
+                    "x": 0,
+                    "y": 18
+                },
+                "panelIndex": "p5",
+                "title": "Web interface state over time",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Slowest DOCSIS status page request in each interval. A sustained climb usually ends with the modem's web server wedging.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-rt",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-rt": {
+                                            "columnOrder": [
+                                                "rx",
+                                                "ry"
+                                            ],
+                                            "columns": {
+                                                "rx": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "ry": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Response time (ms)",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 0,
+                                                                "suffix": " ms"
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.status.web_ui.response_time_ms"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "Linear",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "ry"
+                                        ],
+                                        "layerId": "l-rt",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "line",
+                                        "showGridlines": false,
+                                        "xAccessor": "rx"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "line",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Web interface response time",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p6",
+                    "w": 24,
+                    "x": 24,
+                    "y": 18
+                },
+                "panelIndex": "p6",
+                "title": "Web interface response time",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Uptime reported by the modem. A drop between two points means the modem rebooted.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-up",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-up": {
+                                            "columnOrder": [
+                                                "ux",
+                                                "uy"
+                                            ],
+                                            "columns": {
+                                                "ux": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "uy": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Uptime",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "duration",
+                                                            "params": {
+                                                                "formatOverride": true,
+                                                                "includeSpaceWithSuffix": true,
+                                                                "inputFormat": "seconds",
+                                                                "outputFormat": "humanizePrecise",
+                                                                "outputPrecision": 1,
+                                                                "useTimeFormat": false
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.status.uptime_seconds"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "uy"
+                                        ],
+                                        "layerId": "l-up",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "line",
+                                        "showGridlines": false,
+                                        "xAccessor": "ux"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": false,
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "line",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Modem uptime",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p7",
+                    "w": 24,
+                    "x": 0,
+                    "y": 32
+                },
+                "panelIndex": "p7",
+                "title": "Modem uptime",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Identity of the modem from the most recent successful poll. Failed polls carry no device information, so the panel is scoped to successful polls.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-dev",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-dev": {
+                                            "columnOrder": [
+                                                "dev1",
+                                                "dev2",
+                                                "dev3",
+                                                "dev4",
+                                                "dev5"
+                                            ],
+                                            "columns": {
+                                                "dev1": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Serial number",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "observer.serial_number"
+                                                },
+                                                "dev2": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Firmware",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "observer.version"
+                                                },
+                                                "dev3": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Hardware",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.device.hardware_version"
+                                                },
+                                                "dev4": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "MAC address",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "observer.mac"
+                                                },
+                                                "dev5": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "CM certificate",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.device.cm_certificate"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\" and event.outcome: \"success\""
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "dev1",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "dev2",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "dev3",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "dev4",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "dev5",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-dev",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "Device information",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 6,
+                    "i": "p8",
+                    "w": 48,
+                    "x": 0,
+                    "y": 12
+                },
+                "panelIndex": "p8",
+                "title": "Device information",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "The modem's startup procedure table as of the last successful poll. The downstream channel row reports its lock state in the comment and its frequency in the status.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-startup",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-startup": {
+                                            "columnOrder": [
+                                                "st6",
+                                                "st7",
+                                                "st8",
+                                                "st9",
+                                                "st10",
+                                                "st11",
+                                                "st12",
+                                                "st13",
+                                                "st14",
+                                                "st15",
+                                                "st16",
+                                                "st17"
+                                            ],
+                                            "columns": {
+                                                "st10": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Boot state",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.boot_state.status"
+                                                },
+                                                "st11": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Boot detail",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.boot_state.comment"
+                                                },
+                                                "st12": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Configuration file",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.configuration_file.status"
+                                                },
+                                                "st13": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Configuration file name",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.configuration_file.comment"
+                                                },
+                                                "st14": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Security",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.security.status"
+                                                },
+                                                "st15": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Security method",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.security.comment"
+                                                },
+                                                "st16": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "IP provisioning mode",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.ip_provisioning_mode.status"
+                                                },
+                                                "st17": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "IP provisioning detail",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.ip_provisioning_mode.comment"
+                                                },
+                                                "st6": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Acquire downstream channel",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.acquire_downstream_channel.comment"
+                                                },
+                                                "st7": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Downstream frequency",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 0,
+                                                                "suffix": " Hz"
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.acquire_downstream_channel.frequency"
+                                                },
+                                                "st8": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Connectivity state",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.connectivity_state.status"
+                                                },
+                                                "st9": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Connectivity detail",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.status.startup_procedure.connectivity_state.comment"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.status\" and event.outcome: \"success\""
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "st6",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st7",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st8",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st9",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st10",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st11",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st12",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st13",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st14",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st15",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st16",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "st17",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-startup",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "DOCSIS startup procedure",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p9",
+                    "w": 48,
+                    "x": 0,
+                    "y": 46
+                },
+                "panelIndex": "p9",
+                "title": "DOCSIS startup procedure",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Modem event log rows over time, broken down by the severity the modem assigned.",
+                        "references": [
+                            {
+                                "id": "logs-*",
+                                "name": "indexpattern-datasource-layer-l-lvl",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-lvl": {
+                                            "columnOrder": [
+                                                "lx",
+                                                "lb",
+                                                "ly"
+                                            ],
+                                            "columns": {
+                                                "lb": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": true,
+                                                    "label": "Severity",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "columnId": "ly",
+                                                            "type": "column"
+                                                        },
+                                                        "orderDirection": "desc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 10
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "log.level"
+                                                },
+                                                "lx": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "ly": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Events",
+                                                    "operationType": "count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "___records___"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.event_log\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "ly"
+                                        ],
+                                        "layerId": "l-lvl",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "bar_stacked",
+                                        "showGridlines": false,
+                                        "splitAccessor": "lb",
+                                        "xAccessor": "lx"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "bar_stacked",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Event log volume by severity",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p10",
+                    "w": 24,
+                    "x": 24,
+                    "y": 32
+                },
+                "panelIndex": "p10",
+                "title": "Event log volume by severity",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "T3 timeouts (82000500 unicast ranging, 82000200 ranging response) and T4 timeouts (82000400). The single most useful line health signal: a rising count means the upstream is not getting through.",
+                        "references": [
+                            {
+                                "id": "logs-*",
+                                "name": "indexpattern-datasource-layer-l-t3",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-t3": {
+                                            "columnOrder": [
+                                                "tx",
+                                                "tb",
+                                                "ty"
+                                            ],
+                                            "columns": {
+                                                "tb": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": true,
+                                                    "label": "Event code",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "columnId": "ty",
+                                                            "type": "column"
+                                                        },
+                                                        "orderDirection": "desc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 5
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "event.code"
+                                                },
+                                                "tx": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "ty": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Occurrences",
+                                                    "operationType": "sum",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.event_log.count"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.event_log\" and event.code: (82000500 or 82000200 or 82000400)"
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "ty"
+                                        ],
+                                        "layerId": "l-t3",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "bar_stacked",
+                                        "showGridlines": false,
+                                        "splitAccessor": "tb",
+                                        "xAccessor": "tx"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "bar_stacked",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "DOCSIS ranging timeouts over time",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 16,
+                    "i": "p11",
+                    "w": 24,
+                    "x": 0,
+                    "y": 54
+                },
+                "panelIndex": "p11",
+                "title": "DOCSIS ranging timeouts over time",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "DOCSIS event codes seen in the modem event log. Occurrences sums the modem's own repeat counter, which is usually much larger than the number of rows collected.",
+                        "references": [
+                            {
+                                "id": "logs-*",
+                                "name": "indexpattern-datasource-layer-l-top",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-top": {
+                                            "columnOrder": [
+                                                "ob",
+                                                "o1",
+                                                "o2",
+                                                "o3",
+                                                "o4"
+                                            ],
+                                            "columns": {
+                                                "o1": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Severity",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "log.level"
+                                                },
+                                                "o2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Occurrences",
+                                                    "operationType": "sum",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.event_log.count"
+                                                },
+                                                "o3": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Rows collected",
+                                                    "operationType": "count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "___records___"
+                                                },
+                                                "o4": {
+                                                    "customLabel": true,
+                                                    "dataType": "date",
+                                                    "isBucketed": false,
+                                                    "label": "Last seen",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "ob": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": true,
+                                                    "label": "Event code",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "columnId": "o2",
+                                                            "type": "column"
+                                                        },
+                                                        "orderDirection": "desc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 20
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "event.code"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.event_log\""
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "ob",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "o1",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "o2",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "o3",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "o4",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-top",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "Top event codes",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 16,
+                    "i": "p12",
+                    "w": 24,
+                    "x": 24,
+                    "y": 54
+                },
+                "panelIndex": "p12",
+                "title": "Top event codes",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "The most recent rows of the modem's DOCSIS event log with the message text. Occurrences is the modem's own repeat counter for the row.",
+                        "references": [],
+                        "state": {
+                            "adHocDataViews": {
+                                "netgear-genie-l-recent": {
+                                    "allowHidden": false,
+                                    "allowNoIndex": false,
+                                    "fieldAttrs": {},
+                                    "fieldFormats": {},
+                                    "id": "netgear-genie-l-recent",
+                                    "name": "logs-netgear_genie.event_log-*",
+                                    "runtimeFieldMap": {},
+                                    "sourceFilters": [],
+                                    "timeFieldName": "@timestamp",
+                                    "title": "logs-netgear_genie.event_log-*",
+                                    "type": "esql"
+                                }
+                            },
+                            "datasourceStates": {
+                                "textBased": {
+                                    "layers": {
+                                        "l-recent": {
+                                            "columns": [
+                                                {
+                                                    "columnId": "@timestamp",
+                                                    "customLabel": true,
+                                                    "fieldName": "@timestamp",
+                                                    "label": "Time",
+                                                    "meta": {
+                                                        "type": "date"
+                                                    }
+                                                },
+                                                {
+                                                    "columnId": "log.level",
+                                                    "customLabel": true,
+                                                    "fieldName": "log.level",
+                                                    "label": "Severity",
+                                                    "meta": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                {
+                                                    "columnId": "event.code",
+                                                    "customLabel": true,
+                                                    "fieldName": "event.code",
+                                                    "label": "Event code",
+                                                    "meta": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                {
+                                                    "columnId": "message",
+                                                    "customLabel": true,
+                                                    "fieldName": "message",
+                                                    "label": "Message",
+                                                    "meta": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                {
+                                                    "columnId": "netgear_genie.event_log.count",
+                                                    "customLabel": true,
+                                                    "fieldName": "netgear_genie.event_log.count",
+                                                    "label": "Occurrences",
+                                                    "meta": {
+                                                        "type": "number"
+                                                    }
+                                                }
+                                            ],
+                                            "index": "netgear-genie-l-recent",
+                                            "query": {
+                                                "esql": "FROM logs-netgear_genie.event_log-*\n| KEEP @timestamp, log.level, event.code, message, netgear_genie.event_log.count\n| SORT @timestamp DESC\n| LIMIT 200"
+                                            },
+                                            "timeField": "@timestamp"
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [
+                                {
+                                    "id": "netgear-genie-l-recent",
+                                    "name": "indexpattern-datasource-layer-l-recent",
+                                    "type": "index-pattern"
+                                }
+                            ],
+                            "query": {
+                                "esql": "FROM logs-netgear_genie.event_log-*\n| KEEP @timestamp, log.level, event.code, message, netgear_genie.event_log.count\n| SORT @timestamp DESC\n| LIMIT 200"
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "@timestamp",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "log.level",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "event.code",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "message",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "netgear_genie.event_log.count",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-recent",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "Recent modem events",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 16,
+                    "i": "p13",
+                    "w": 48,
+                    "x": 0,
+                    "y": 70
+                },
+                "panelIndex": "p13",
+                "title": "Recent modem events",
+                "type": "lens"
+            }
+        ],
+        "timeRestore": false,
+        "title": "[NETGEAR Genie] Modem health overview",
+        "version": 1
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2026-09-30T21:01:52.783Z",
+    "id": "netgear_genie-modem-health-overview",
+    "references": [
+        {
+            "id": "metrics-*",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+            "type": "index-pattern"
+        },
+        {
+            "id": "netgear_genie-modem-health-overview",
+            "name": "nav:link_7d15f96d-393e-504b-83bf-771233f08653_dashboard",
+            "type": "dashboard"
+        },
+        {
+            "id": "netgear_genie-docsis-channels",
+            "name": "nav:link_7477064a-7055-50e0-a8d2-b4e7f3f702aa_dashboard",
+            "type": "dashboard"
+        },
+        {
+            "id": "metrics-*",
+            "name": "controlGroup_0f946b83-5b57-5d94-803d-0fd2707a23fb:optionsListControlDataView",
+            "type": "index-pattern"
+        },
+        {
+            "id": "metrics-*",
+            "name": "controlGroup_849d0ec6-4dbf-5e70-8fbd-5f25e16a0dda:optionsListControlDataView",
+            "type": "index-pattern"
+        }
+    ],
+    "type": "dashboard",
+    "typeMigrationVersion": "10.3.0"
+}

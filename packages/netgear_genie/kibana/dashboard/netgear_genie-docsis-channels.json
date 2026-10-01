@@ -1,0 +1,2366 @@
+{
+    "attributes": {
+        "controlGroupInput": {
+            "chainingSystem": "HIERARCHICAL",
+            "controlStyle": "oneLine",
+            "ignoreParentSettingsJSON": {
+                "ignoreFilters": false,
+                "ignoreQuery": false,
+                "ignoreTimerange": false,
+                "ignoreValidations": false
+            },
+            "panelsJSON": {
+                "104114a2-9222-56de-9b32-b7b4d95d0b9c": {
+                    "explicitInput": {
+                        "dataViewId": "metrics-*",
+                        "enhancements": {},
+                        "exclude": false,
+                        "existsSelected": false,
+                        "fieldName": "netgear_genie.channel.channel_id",
+                        "hideExclude": false,
+                        "hideExists": false,
+                        "id": "104114a2-9222-56de-9b32-b7b4d95d0b9c",
+                        "searchTechnique": "prefix",
+                        "selectedOptions": [],
+                        "singleSelect": false,
+                        "title": "Channel ID"
+                    },
+                    "grow": true,
+                    "order": 3,
+                    "type": "optionsListControl",
+                    "width": "medium"
+                },
+                "3a60c273-5403-595b-9a3e-0b9dad478f51": {
+                    "explicitInput": {
+                        "dataViewId": "metrics-*",
+                        "enhancements": {},
+                        "exclude": false,
+                        "existsSelected": false,
+                        "fieldName": "netgear_genie.channel.modulation",
+                        "hideExclude": false,
+                        "hideExists": false,
+                        "id": "3a60c273-5403-595b-9a3e-0b9dad478f51",
+                        "searchTechnique": "prefix",
+                        "selectedOptions": [],
+                        "singleSelect": false,
+                        "title": "Modulation"
+                    },
+                    "grow": true,
+                    "order": 1,
+                    "type": "optionsListControl",
+                    "width": "small"
+                },
+                "65cf0656-7527-59ff-9cb1-154eaef64b2a": {
+                    "explicitInput": {
+                        "dataViewId": "metrics-*",
+                        "enhancements": {},
+                        "exclude": false,
+                        "existsSelected": false,
+                        "fieldName": "netgear_genie.channel.type",
+                        "hideExclude": false,
+                        "hideExists": false,
+                        "id": "65cf0656-7527-59ff-9cb1-154eaef64b2a",
+                        "searchTechnique": "prefix",
+                        "selectedOptions": [],
+                        "singleSelect": false,
+                        "title": "Direction"
+                    },
+                    "grow": true,
+                    "order": 0,
+                    "type": "optionsListControl",
+                    "width": "small"
+                },
+                "6ac74d93-eec9-516a-94f8-e50aeb51fe5a": {
+                    "explicitInput": {
+                        "dataViewId": "metrics-*",
+                        "enhancements": {},
+                        "exclude": false,
+                        "existsSelected": false,
+                        "fieldName": "netgear_genie.channel.lock_status",
+                        "hideExclude": false,
+                        "hideExists": false,
+                        "id": "6ac74d93-eec9-516a-94f8-e50aeb51fe5a",
+                        "searchTechnique": "prefix",
+                        "selectedOptions": [],
+                        "singleSelect": false,
+                        "title": "Lock status"
+                    },
+                    "grow": true,
+                    "order": 2,
+                    "type": "optionsListControl",
+                    "width": "small"
+                }
+            },
+            "showApplySelections": false
+        },
+        "description": "Downstream and upstream DOCSIS channel health for a NETGEAR cable modem: locked channel counts, per channel power and SNR, and codeword error rates. Use the dropdowns to narrow to one direction, modulation or channel.",
+        "kibanaSavedObjectMeta": {
+            "searchSourceJSON": {
+                "filter": [
+                    {
+                        "$state": {
+                            "store": "appState"
+                        },
+                        "meta": {
+                            "alias": null,
+                            "disabled": false,
+                            "index": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+                            "key": "data_stream.dataset",
+                            "negate": false,
+                            "params": [
+                                "netgear_genie.channel"
+                            ],
+                            "type": "phrases"
+                        },
+                        "query": {
+                            "bool": {
+                                "minimum_should_match": 1,
+                                "should": [
+                                    {
+                                        "match_phrase": {
+                                            "data_stream.dataset": "netgear_genie.channel"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "query": {
+                    "language": "kuery",
+                    "query": ""
+                }
+            }
+        },
+        "optionsJSON": {
+            "hidePanelTitles": false,
+            "syncColors": false,
+            "syncCursor": true,
+            "syncTooltips": false,
+            "useMargins": true
+        },
+        "panelsJSON": [
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "layout": "horizontal",
+                        "links": [
+                            {
+                                "destinationRefName": "link_bd797cc2-4802-5da3-85be-38300f1591fe_dashboard",
+                                "id": "bd797cc2-4802-5da3-85be-38300f1591fe",
+                                "label": "DOCSIS channels",
+                                "options": {
+                                    "openInNewTab": false,
+                                    "useCurrentDateRange": true,
+                                    "useCurrentFilters": true
+                                },
+                                "order": 0,
+                                "type": "dashboardLink"
+                            },
+                            {
+                                "destinationRefName": "link_35d56bff-de4f-5282-9547-7100685de4ea_dashboard",
+                                "id": "35d56bff-de4f-5282-9547-7100685de4ea",
+                                "label": "Modem health overview",
+                                "options": {
+                                    "openInNewTab": false,
+                                    "useCurrentDateRange": true,
+                                    "useCurrentFilters": true
+                                },
+                                "order": 1,
+                                "type": "dashboardLink"
+                            }
+                        ]
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 4,
+                    "i": "nav",
+                    "w": 48,
+                    "x": 0,
+                    "y": 0
+                },
+                "panelIndex": "nav",
+                "title": "",
+                "type": "links"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Distinct downstream channel identifiers the modem reports as locked. Counted as distinct identifiers because every poll writes a fresh row for every channel slot.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-locked-0",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-locked-0": {
+                                            "columnOrder": [
+                                                "lk0"
+                                            ],
+                                            "columns": {
+                                                "lk0": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Locked downstream channels",
+                                                    "operationType": "unique_count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "layerId": "l-locked-0",
+                                "layerType": "data",
+                                "metricAccessor": "lk0",
+                                "subtitle": "Bonded QAM plus OFDM"
+                            }
+                        },
+                        "title": "Locked downstream channels",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p14",
+                    "w": 12,
+                    "x": 0,
+                    "y": 4
+                },
+                "panelIndex": "p14",
+                "title": "Locked downstream channels",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Distinct upstream channel identifiers the modem reports as locked.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-locked-1",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-locked-1": {
+                                            "columnOrder": [
+                                                "lk1"
+                                            ],
+                                            "columns": {
+                                                "lk1": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Locked upstream channels",
+                                                    "operationType": "unique_count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"upstream\""
+                            },
+                            "visualization": {
+                                "layerId": "l-locked-1",
+                                "layerType": "data",
+                                "metricAccessor": "lk1",
+                                "subtitle": "Bonded ATDMA plus OFDMA"
+                            }
+                        },
+                        "title": "Locked upstream channels",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p15",
+                    "w": 12,
+                    "x": 12,
+                    "y": 4
+                },
+                "panelIndex": "p15",
+                "title": "Locked upstream channels",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Worst signal to noise ratio across the locked downstream channels. Unlocked slots report 0.0 dB, so the panel is scoped to locked channels.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-minsnr",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-minsnr": {
+                                            "columnOrder": [
+                                                "ms"
+                                            ],
+                                            "columns": {
+                                                "ms": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Lowest SNR",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dB"
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.snr"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "layerId": "l-minsnr",
+                                "layerType": "data",
+                                "metricAccessor": "ms",
+                                "subtitle": "33 dB or more is healthy for QAM256"
+                            }
+                        },
+                        "title": "Lowest downstream SNR",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p16",
+                    "w": 12,
+                    "x": 24,
+                    "y": 4
+                },
+                "panelIndex": "p16",
+                "title": "Lowest downstream SNR",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Highest transmit level across the locked upstream channels. A modem pushing past 51 dBmV is fighting the plant.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-maxup",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-maxup": {
+                                            "columnOrder": [
+                                                "mu"
+                                            ],
+                                            "columns": {
+                                                "mu": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Highest upstream power",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dBmV"
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.power"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"upstream\""
+                            },
+                            "visualization": {
+                                "layerId": "l-maxup",
+                                "layerType": "data",
+                                "metricAccessor": "mu",
+                                "subtitle": "35 to 51 dBmV is healthy"
+                            }
+                        },
+                        "title": "Highest upstream power",
+                        "type": "lens",
+                        "visualizationType": "lnsMetric"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 8,
+                    "i": "p17",
+                    "w": 12,
+                    "x": 36,
+                    "y": 4
+                },
+                "panelIndex": "p17",
+                "title": "Highest upstream power",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Distinct locked channel slots per direction and modulation (sc_qam for DOCSIS 3.0 bonded channels, ofdm and ofdma for DOCSIS 3.1).",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-lockedtbl",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-lockedtbl": {
+                                            "columnOrder": [
+                                                "lt1",
+                                                "lt2",
+                                                "ltv"
+                                            ],
+                                            "columns": {
+                                                "lt1": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": true,
+                                                    "label": "Direction",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "columnId": "ltv",
+                                                            "type": "column"
+                                                        },
+                                                        "orderDirection": "desc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 5
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.type"
+                                                },
+                                                "lt2": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": true,
+                                                    "label": "Modulation",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "columnId": "ltv",
+                                                            "type": "column"
+                                                        },
+                                                        "orderDirection": "desc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 5
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.modulation_type"
+                                                },
+                                                "ltv": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Locked channels",
+                                                    "operationType": "unique_count",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.channel"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true"
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "lt1",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "lt2",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ltv",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-lockedtbl",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "Locked channels by direction and modulation",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p18",
+                    "w": 16,
+                    "x": 0,
+                    "y": 12
+                },
+                "panelIndex": "p18",
+                "title": "Locked channels by direction and modulation",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Received level per locked downstream channel. The reference lines mark the -7 to +7 dBmV range a CM1000 is happy in. Unlocked slots report 0.0 dBmV, so they are filtered out before averaging.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-dspower",
+                                "type": "index-pattern"
+                            },
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-dspower-ref",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-dspower": {
+                                            "columnOrder": [
+                                                "x18",
+                                                "b20",
+                                                "y19"
+                                            ],
+                                            "columns": {
+                                                "b20": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": true,
+                                                    "label": "Channel ID",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "fallback": false,
+                                                            "type": "alphabetical"
+                                                        },
+                                                        "orderDirection": "asc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 45
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                },
+                                                "x18": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "y19": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Power",
+                                                    "operationType": "average",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dBmV"
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.power"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        },
+                                        "l-dspower-ref": {
+                                            "columnOrder": [
+                                                "ref21",
+                                                "ref22"
+                                            ],
+                                            "columns": {
+                                                "ref21": {
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Static value: -7",
+                                                    "operationType": "static_value",
+                                                    "params": {
+                                                        "value": "-7"
+                                                    },
+                                                    "references": [],
+                                                    "scale": "ratio"
+                                                },
+                                                "ref22": {
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Static value: 7",
+                                                    "operationType": "static_value",
+                                                    "params": {
+                                                        "value": "7"
+                                                    },
+                                                    "references": [],
+                                                    "scale": "ratio"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "y19"
+                                        ],
+                                        "layerId": "l-dspower",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "line",
+                                        "showGridlines": false,
+                                        "splitAccessor": "b20",
+                                        "xAccessor": "x18"
+                                    },
+                                    {
+                                        "accessors": [
+                                            "ref21",
+                                            "ref22"
+                                        ],
+                                        "layerId": "l-dspower-ref",
+                                        "layerType": "referenceLine",
+                                        "yConfig": [
+                                            {
+                                                "axisMode": "left",
+                                                "color": "#e7664c",
+                                                "fill": "none",
+                                                "forAccessor": "ref21",
+                                                "lineWidth": 1
+                                            },
+                                            {
+                                                "axisMode": "left",
+                                                "color": "#e7664c",
+                                                "fill": "none",
+                                                "forAccessor": "ref22",
+                                                "lineWidth": 1
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "legendSize": "small",
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "line",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Downstream power by channel",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p19",
+                    "w": 32,
+                    "x": 16,
+                    "y": 12
+                },
+                "panelIndex": "p19",
+                "title": "Downstream power by channel",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Signal to noise ratio per locked downstream channel. The reference line marks 33 dB, the floor for reliable QAM256. Unlocked slots report 0.0 dB and are filtered out.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-dssnr",
+                                "type": "index-pattern"
+                            },
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-dssnr-ref",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-dssnr": {
+                                            "columnOrder": [
+                                                "x23",
+                                                "b25",
+                                                "y24"
+                                            ],
+                                            "columns": {
+                                                "b25": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": true,
+                                                    "label": "Channel ID",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "fallback": false,
+                                                            "type": "alphabetical"
+                                                        },
+                                                        "orderDirection": "asc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 45
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                },
+                                                "x23": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "y24": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "SNR",
+                                                    "operationType": "average",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dB"
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.snr"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        },
+                                        "l-dssnr-ref": {
+                                            "columnOrder": [
+                                                "ref26"
+                                            ],
+                                            "columns": {
+                                                "ref26": {
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Static value: 33",
+                                                    "operationType": "static_value",
+                                                    "params": {
+                                                        "value": "33"
+                                                    },
+                                                    "references": [],
+                                                    "scale": "ratio"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "y24"
+                                        ],
+                                        "layerId": "l-dssnr",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "line",
+                                        "showGridlines": false,
+                                        "splitAccessor": "b25",
+                                        "xAccessor": "x23"
+                                    },
+                                    {
+                                        "accessors": [
+                                            "ref26"
+                                        ],
+                                        "layerId": "l-dssnr-ref",
+                                        "layerType": "referenceLine",
+                                        "yConfig": [
+                                            {
+                                                "axisMode": "left",
+                                                "color": "#e7664c",
+                                                "fill": "none",
+                                                "forAccessor": "ref26",
+                                                "lineWidth": 1
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "legendSize": "small",
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "line",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Downstream SNR by channel",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p20",
+                    "w": 24,
+                    "x": 0,
+                    "y": 26
+                },
+                "panelIndex": "p20",
+                "title": "Downstream SNR by channel",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Transmit level per locked upstream channel. The reference lines mark the 35 to 51 dBmV working range; a modem climbing towards the top of it is compensating for upstream loss.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-uspower",
+                                "type": "index-pattern"
+                            },
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-uspower-ref",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-uspower": {
+                                            "columnOrder": [
+                                                "x27",
+                                                "b29",
+                                                "y28"
+                                            ],
+                                            "columns": {
+                                                "b29": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": true,
+                                                    "label": "Channel ID",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "fallback": false,
+                                                            "type": "alphabetical"
+                                                        },
+                                                        "orderDirection": "asc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 10
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                },
+                                                "x27": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                },
+                                                "y28": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Power",
+                                                    "operationType": "average",
+                                                    "params": {
+                                                        "emptyAsNull": false,
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dBmV"
+                                                            }
+                                                        }
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.power"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        },
+                                        "l-uspower-ref": {
+                                            "columnOrder": [
+                                                "ref30",
+                                                "ref31"
+                                            ],
+                                            "columns": {
+                                                "ref30": {
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Static value: 35",
+                                                    "operationType": "static_value",
+                                                    "params": {
+                                                        "value": "35"
+                                                    },
+                                                    "references": [],
+                                                    "scale": "ratio"
+                                                },
+                                                "ref31": {
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Static value: 51",
+                                                    "operationType": "static_value",
+                                                    "params": {
+                                                        "value": "51"
+                                                    },
+                                                    "references": [],
+                                                    "scale": "ratio"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"upstream\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "y28"
+                                        ],
+                                        "layerId": "l-uspower",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "line",
+                                        "showGridlines": false,
+                                        "splitAccessor": "b29",
+                                        "xAccessor": "x27"
+                                    },
+                                    {
+                                        "accessors": [
+                                            "ref30",
+                                            "ref31"
+                                        ],
+                                        "layerId": "l-uspower-ref",
+                                        "layerType": "referenceLine",
+                                        "yConfig": [
+                                            {
+                                                "axisMode": "left",
+                                                "color": "#e7664c",
+                                                "fill": "none",
+                                                "forAccessor": "ref30",
+                                                "lineWidth": 1
+                                            },
+                                            {
+                                                "axisMode": "left",
+                                                "color": "#e7664c",
+                                                "fill": "none",
+                                                "forAccessor": "ref31",
+                                                "lineWidth": 1
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "legendSize": "small",
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "line",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Upstream power by channel",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p21",
+                    "w": 24,
+                    "x": 24,
+                    "y": 26
+                },
+                "panelIndex": "p21",
+                "title": "Upstream power by channel",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "The modem reports codeword counters cumulatively since boot, so this panel charts the change between intervals rather than the raw counter. A single deep negative bar is the counter resetting on a modem reboot, not an improvement.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-uncorr",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-uncorr": {
+                                            "columnOrder": [
+                                                "ub2",
+                                                "ux2",
+                                                "um2",
+                                                "ud2"
+                                            ],
+                                            "columns": {
+                                                "ub2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": true,
+                                                    "label": "Channel ID",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "fallback": false,
+                                                            "type": "alphabetical"
+                                                        },
+                                                        "orderDirection": "asc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 40
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                },
+                                                "ud2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Uncorrectable codewords per interval",
+                                                    "operationType": "differences",
+                                                    "params": {},
+                                                    "references": [
+                                                        "um2"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "um2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Uncorrectable codewords",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "ux2": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "ud2"
+                                        ],
+                                        "layerId": "l-uncorr",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "bar_stacked",
+                                        "showGridlines": false,
+                                        "splitAccessor": "ub2",
+                                        "xAccessor": "ux2"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "legendSize": "small",
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "bar_stacked",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Uncorrectable codewords per interval",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p22",
+                    "w": 24,
+                    "x": 0,
+                    "y": 40
+                },
+                "panelIndex": "p22",
+                "title": "Uncorrectable codewords per interval",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Correctable codewords rising on their own is normal forward error correction work. Uncorrectable codewords rising is real impairment on the plant.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-cwmix",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-cwmix": {
+                                            "columnOrder": [
+                                                "cx3",
+                                                "cm3a",
+                                                "cd3a",
+                                                "cm3b",
+                                                "cd3b"
+                                            ],
+                                            "columns": {
+                                                "cd3a": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Correctable per interval",
+                                                    "operationType": "differences",
+                                                    "params": {},
+                                                    "references": [
+                                                        "cm3a"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "cd3b": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Uncorrectable per interval",
+                                                    "operationType": "differences",
+                                                    "params": {},
+                                                    "references": [
+                                                        "cm3b"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "cm3a": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Correctable codewords",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "cm3b": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Uncorrectable codewords",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "cx3": {
+                                                    "dataType": "date",
+                                                    "isBucketed": true,
+                                                    "label": "@timestamp",
+                                                    "operationType": "date_histogram",
+                                                    "params": {
+                                                        "dropPartials": false,
+                                                        "includeEmptyRows": true,
+                                                        "interval": "auto"
+                                                    },
+                                                    "scale": "interval",
+                                                    "sourceField": "@timestamp"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "axisTitlesVisibilitySettings": {
+                                    "x": false,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "fittingFunction": "None",
+                                "gridlinesVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "labelsOrientation": {
+                                    "x": 0,
+                                    "yLeft": 0,
+                                    "yRight": 0
+                                },
+                                "layers": [
+                                    {
+                                        "accessors": [
+                                            "cd3a",
+                                            "cd3b"
+                                        ],
+                                        "layerId": "l-cwmix",
+                                        "layerType": "data",
+                                        "position": "top",
+                                        "seriesType": "line",
+                                        "showGridlines": false,
+                                        "xAccessor": "cx3"
+                                    }
+                                ],
+                                "legend": {
+                                    "isVisible": true,
+                                    "position": "right"
+                                },
+                                "preferredSeriesType": "line",
+                                "tickLabelsVisibilitySettings": {
+                                    "x": true,
+                                    "yLeft": true,
+                                    "yRight": true
+                                },
+                                "valueLabels": "hide"
+                            }
+                        },
+                        "title": "Correctable and uncorrectable codewords per interval",
+                        "type": "lens",
+                        "visualizationType": "lnsXY"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 14,
+                    "i": "p23",
+                    "w": 24,
+                    "x": 24,
+                    "y": 40
+                },
+                "panelIndex": "p23",
+                "title": "Correctable and uncorrectable codewords per interval",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Codewords the modem could not correct, relative to every codeword it received on that channel over the selected time range. Counters reset when the modem reboots, so a range that spans a reboot measures the period after it.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-ratio",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-ratio": {
+                                            "columnOrder": [
+                                                "rb",
+                                                "ur",
+                                                "urX0",
+                                                "urX1",
+                                                "urX2",
+                                                "urX3",
+                                                "urX4",
+                                                "urX5",
+                                                "urX6",
+                                                "urX7",
+                                                "urX8",
+                                                "cr",
+                                                "crX0",
+                                                "crX1",
+                                                "crX2",
+                                                "crX3",
+                                                "crX4",
+                                                "crX5",
+                                                "crX6",
+                                                "crX7",
+                                                "crX8"
+                                            ],
+                                            "columns": {
+                                                "cr": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Correctable ratio",
+                                                    "operationType": "formula",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "percent",
+                                                            "params": {
+                                                                "decimals": 4
+                                                            }
+                                                        },
+                                                        "formula": "(max(netgear_genie.channel.correctable_codewords) - min(netgear_genie.channel.correctable_codewords)) / ((max(netgear_genie.channel.unerrored_codewords) - min(netgear_genie.channel.unerrored_codewords)) + (max(netgear_genie.channel.correctable_codewords) - min(netgear_genie.channel.correctable_codewords)) + (max(netgear_genie.channel.uncorrectable_codewords) - min(netgear_genie.channel.uncorrectable_codewords)))",
+                                                        "isFormulaBroken": false
+                                                    },
+                                                    "references": [
+                                                        "crX8"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "crX0": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "crX1": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "crX2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.unerrored_codewords"
+                                                },
+                                                "crX3": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.unerrored_codewords"
+                                                },
+                                                "crX4": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "crX5": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "crX6": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "crX7": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "crX8": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Correctable ratio",
+                                                    "operationType": "math",
+                                                    "params": {
+                                                        "tinymathAst": {
+                                                            "args": [
+                                                                {
+                                                                    "args": [
+                                                                        "crX0",
+                                                                        "crX1"
+                                                                    ],
+                                                                    "name": "subtract",
+                                                                    "type": "function"
+                                                                },
+                                                                {
+                                                                    "args": [
+                                                                        {
+                                                                            "args": [
+                                                                                {
+                                                                                    "args": [
+                                                                                        "crX2",
+                                                                                        "crX3"
+                                                                                    ],
+                                                                                    "name": "subtract",
+                                                                                    "type": "function"
+                                                                                },
+                                                                                {
+                                                                                    "args": [
+                                                                                        "crX4",
+                                                                                        "crX5"
+                                                                                    ],
+                                                                                    "name": "subtract",
+                                                                                    "type": "function"
+                                                                                }
+                                                                            ],
+                                                                            "name": "add",
+                                                                            "type": "function"
+                                                                        },
+                                                                        {
+                                                                            "args": [
+                                                                                "crX6",
+                                                                                "crX7"
+                                                                            ],
+                                                                            "name": "subtract",
+                                                                            "type": "function"
+                                                                        }
+                                                                    ],
+                                                                    "name": "add",
+                                                                    "type": "function"
+                                                                }
+                                                            ],
+                                                            "name": "divide",
+                                                            "type": "function"
+                                                        }
+                                                    },
+                                                    "references": [
+                                                        "crX0",
+                                                        "crX1",
+                                                        "crX2",
+                                                        "crX3",
+                                                        "crX4",
+                                                        "crX5",
+                                                        "crX6",
+                                                        "crX7"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "rb": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": true,
+                                                    "label": "Channel ID",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "fallback": false,
+                                                            "type": "alphabetical"
+                                                        },
+                                                        "orderDirection": "asc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 40
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                },
+                                                "ur": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Uncorrectable ratio",
+                                                    "operationType": "formula",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "percent",
+                                                            "params": {
+                                                                "decimals": 4
+                                                            }
+                                                        },
+                                                        "formula": "(max(netgear_genie.channel.uncorrectable_codewords) - min(netgear_genie.channel.uncorrectable_codewords)) / ((max(netgear_genie.channel.unerrored_codewords) - min(netgear_genie.channel.unerrored_codewords)) + (max(netgear_genie.channel.correctable_codewords) - min(netgear_genie.channel.correctable_codewords)) + (max(netgear_genie.channel.uncorrectable_codewords) - min(netgear_genie.channel.uncorrectable_codewords)))",
+                                                        "isFormulaBroken": false
+                                                    },
+                                                    "references": [
+                                                        "urX8"
+                                                    ],
+                                                    "scale": "ratio"
+                                                },
+                                                "urX0": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "urX1": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "urX2": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.unerrored_codewords"
+                                                },
+                                                "urX3": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.unerrored_codewords"
+                                                },
+                                                "urX4": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "urX5": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.correctable_codewords"
+                                                },
+                                                "urX6": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "max",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "urX7": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "min",
+                                                    "params": {
+                                                        "emptyAsNull": false
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.uncorrectable_codewords"
+                                                },
+                                                "urX8": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Part of Uncorrectable ratio",
+                                                    "operationType": "math",
+                                                    "params": {
+                                                        "tinymathAst": {
+                                                            "args": [
+                                                                {
+                                                                    "args": [
+                                                                        "urX0",
+                                                                        "urX1"
+                                                                    ],
+                                                                    "name": "subtract",
+                                                                    "type": "function"
+                                                                },
+                                                                {
+                                                                    "args": [
+                                                                        {
+                                                                            "args": [
+                                                                                {
+                                                                                    "args": [
+                                                                                        "urX2",
+                                                                                        "urX3"
+                                                                                    ],
+                                                                                    "name": "subtract",
+                                                                                    "type": "function"
+                                                                                },
+                                                                                {
+                                                                                    "args": [
+                                                                                        "urX4",
+                                                                                        "urX5"
+                                                                                    ],
+                                                                                    "name": "subtract",
+                                                                                    "type": "function"
+                                                                                }
+                                                                            ],
+                                                                            "name": "add",
+                                                                            "type": "function"
+                                                                        },
+                                                                        {
+                                                                            "args": [
+                                                                                "urX6",
+                                                                                "urX7"
+                                                                            ],
+                                                                            "name": "subtract",
+                                                                            "type": "function"
+                                                                        }
+                                                                    ],
+                                                                    "name": "add",
+                                                                    "type": "function"
+                                                                }
+                                                            ],
+                                                            "name": "divide",
+                                                            "type": "function"
+                                                        }
+                                                    },
+                                                    "references": [
+                                                        "urX0",
+                                                        "urX1",
+                                                        "urX2",
+                                                        "urX3",
+                                                        "urX4",
+                                                        "urX5",
+                                                        "urX6",
+                                                        "urX7"
+                                                    ],
+                                                    "scale": "ratio"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true and netgear_genie.channel.type: \"downstream\""
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "rb",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ur",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "cr",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-ratio",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "Codeword error ratio by channel",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 17,
+                    "i": "p24",
+                    "w": 20,
+                    "x": 0,
+                    "y": 54
+                },
+                "panelIndex": "p24",
+                "title": "Codeword error ratio by channel",
+                "type": "lens"
+            },
+            {
+                "embeddableConfig": {
+                    "attributes": {
+                        "description": "Every locked channel as the modem last reported it. Unlocked slots all report channel identifier 0 and zeroed values, so they are left out.",
+                        "references": [
+                            {
+                                "id": "metrics-*",
+                                "name": "indexpattern-datasource-layer-l-chtbl",
+                                "type": "index-pattern"
+                            }
+                        ],
+                        "state": {
+                            "adHocDataViews": {},
+                            "datasourceStates": {
+                                "formBased": {
+                                    "layers": {
+                                        "l-chtbl": {
+                                            "columnOrder": [
+                                                "cb9",
+                                                "ch32",
+                                                "ch33",
+                                                "ch34",
+                                                "ch35",
+                                                "ch36",
+                                                "ch37",
+                                                "ch38",
+                                                "ch39"
+                                            ],
+                                            "columns": {
+                                                "cb9": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": true,
+                                                    "label": "Channel ID",
+                                                    "operationType": "terms",
+                                                    "params": {
+                                                        "exclude": [],
+                                                        "excludeIsRegex": false,
+                                                        "include": [],
+                                                        "includeIsRegex": false,
+                                                        "missingBucket": false,
+                                                        "orderBy": {
+                                                            "fallback": false,
+                                                            "type": "alphabetical"
+                                                        },
+                                                        "orderDirection": "asc",
+                                                        "otherBucket": false,
+                                                        "parentFormat": {
+                                                            "id": "terms"
+                                                        },
+                                                        "size": 60
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.channel_id"
+                                                },
+                                                "ch32": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Slot",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 0
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.channel"
+                                                },
+                                                "ch33": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Direction",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.type"
+                                                },
+                                                "ch34": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Modulation type",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.modulation_type"
+                                                },
+                                                "ch35": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Modulation",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.modulation"
+                                                },
+                                                "ch36": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Frequency",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 0,
+                                                                "suffix": " Hz"
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.frequency"
+                                                },
+                                                "ch37": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "Power",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dBmV"
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.power"
+                                                },
+                                                "ch38": {
+                                                    "customLabel": true,
+                                                    "dataType": "number",
+                                                    "isBucketed": false,
+                                                    "label": "SNR",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "format": {
+                                                            "id": "number",
+                                                            "params": {
+                                                                "decimals": 1,
+                                                                "suffix": " dB"
+                                                            }
+                                                        },
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ratio",
+                                                    "sourceField": "netgear_genie.channel.snr"
+                                                },
+                                                "ch39": {
+                                                    "customLabel": true,
+                                                    "dataType": "string",
+                                                    "isBucketed": false,
+                                                    "label": "Lock status",
+                                                    "operationType": "last_value",
+                                                    "params": {
+                                                        "showArrayValues": false,
+                                                        "sortField": "@timestamp"
+                                                    },
+                                                    "scale": "ordinal",
+                                                    "sourceField": "netgear_genie.channel.lock_status"
+                                                }
+                                            },
+                                            "incompleteColumns": {},
+                                            "sampling": 1
+                                        }
+                                    }
+                                }
+                            },
+                            "filters": [],
+                            "internalReferences": [],
+                            "query": {
+                                "language": "kuery",
+                                "query": "data_stream.dataset: \"netgear_genie.channel\" and netgear_genie.channel.locked: true"
+                            },
+                            "visualization": {
+                                "columns": [
+                                    {
+                                        "columnId": "cb9",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch32",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch33",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch34",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch35",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch36",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch37",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch38",
+                                        "isTransposed": false
+                                    },
+                                    {
+                                        "columnId": "ch39",
+                                        "isTransposed": false
+                                    }
+                                ],
+                                "layerId": "l-chtbl",
+                                "layerType": "data"
+                            }
+                        },
+                        "title": "Channel status",
+                        "type": "lens",
+                        "visualizationType": "lnsDatatable"
+                    },
+                    "enhancements": {}
+                },
+                "gridData": {
+                    "h": 17,
+                    "i": "p25",
+                    "w": 28,
+                    "x": 20,
+                    "y": 54
+                },
+                "panelIndex": "p25",
+                "title": "Channel status",
+                "type": "lens"
+            }
+        ],
+        "timeRestore": false,
+        "title": "[NETGEAR Genie] DOCSIS channels",
+        "version": 1
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2026-09-30T21:01:52.783Z",
+    "id": "netgear_genie-docsis-channels",
+    "references": [
+        {
+            "id": "metrics-*",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+            "type": "index-pattern"
+        },
+        {
+            "id": "netgear_genie-docsis-channels",
+            "name": "nav:link_bd797cc2-4802-5da3-85be-38300f1591fe_dashboard",
+            "type": "dashboard"
+        },
+        {
+            "id": "netgear_genie-modem-health-overview",
+            "name": "nav:link_35d56bff-de4f-5282-9547-7100685de4ea_dashboard",
+            "type": "dashboard"
+        },
+        {
+            "id": "metrics-*",
+            "name": "controlGroup_65cf0656-7527-59ff-9cb1-154eaef64b2a:optionsListControlDataView",
+            "type": "index-pattern"
+        },
+        {
+            "id": "metrics-*",
+            "name": "controlGroup_3a60c273-5403-595b-9a3e-0b9dad478f51:optionsListControlDataView",
+            "type": "index-pattern"
+        },
+        {
+            "id": "metrics-*",
+            "name": "controlGroup_6ac74d93-eec9-516a-94f8-e50aeb51fe5a:optionsListControlDataView",
+            "type": "index-pattern"
+        },
+        {
+            "id": "metrics-*",
+            "name": "controlGroup_104114a2-9222-56de-9b32-b7b4d95d0b9c:optionsListControlDataView",
+            "type": "index-pattern"
+        }
+    ],
+    "type": "dashboard",
+    "typeMigrationVersion": "10.3.0"
+}

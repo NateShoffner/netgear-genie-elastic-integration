@@ -1,0 +1,6 @@
+# newer versions go on top
+- version: "0.1.0"
+  changes:
+    - description: Initial release with event log, DOCSIS channel and status data streams, two dashboards and two alerting rule templates.
+      type: enhancement
+      link: https://github.com/NateShoffner/netgear-genie-elastic-integration/issues/1

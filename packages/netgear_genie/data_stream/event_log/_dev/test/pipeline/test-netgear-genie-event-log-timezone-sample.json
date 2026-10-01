@@ -1,0 +1,7 @@
+{
+    "events": [
+        {
+            "message": "{\"count\":\"94\",\"first_time\":\"2026-08-31, 08:00:55\",\"id\":\"82000500\",\"index\":\"1\",\"last_time\":\"2026-09-22, 03:17:46\",\"level\":\"Critical (3)\",\"text\":\"Started Unicast Maintenance Ranging - No Response received - T3 time-out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}"
+        }
+    ]
+}

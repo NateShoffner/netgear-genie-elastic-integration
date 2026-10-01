@@ -1,0 +1,18 @@
+wait_for_data_timeout: 1m
+input: cel
+service: netgear_genie-channel
+vars:
+  url: http://{{Hostname}}:{{Port}}
+  username: admin
+  password: test-password
+data_stream:
+  vars:
+    # The stream is a full snapshot of every channel on every poll, so the
+    # interval is kept longer than the test window to collect exactly one
+    # snapshot: 32 downstream bonded, 8 upstream bonded, 2 downstream OFDM
+    # and 2 upstream OFDMA channels.
+    interval: 10m
+    take_over_session: true
+    preserve_original_event: true
+assert:
+  hit_count: 44

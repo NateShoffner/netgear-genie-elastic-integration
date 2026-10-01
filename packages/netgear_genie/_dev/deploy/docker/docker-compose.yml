@@ -1,0 +1,41 @@
+version: '2.3'
+services:
+  netgear_genie-event_log:
+    image: docker.elastic.co/observability/stream:v0.22.0
+    hostname: netgear_genie-event_log
+    ports:
+      - 8090
+    volumes:
+      - ./files:/files:ro
+    environment:
+      PORT: '8090'
+    command:
+      - http-server
+      - --addr=:8090
+      - --config=/files/config-event_log.yml
+  netgear_genie-channel:
+    image: docker.elastic.co/observability/stream:v0.22.0
+    hostname: netgear_genie-channel
+    ports:
+      - 8090
+    volumes:
+      - ./files:/files:ro
+    environment:
+      PORT: '8090'
+    command:
+      - http-server
+      - --addr=:8090
+      - --config=/files/config-channel.yml
+  netgear_genie-status:
+    image: docker.elastic.co/observability/stream:v0.22.0
+    hostname: netgear_genie-status
+    ports:
+      - 8090
+    volumes:
+      - ./files:/files:ro
+    environment:
+      PORT: '8090'
+    command:
+      - http-server
+      - --addr=:8090
+      - --config=/files/config-status.yml

@@ -1,0 +1,62 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T19:38:54.196121700Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"1\",\"channel_id\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation_type\":\"ofdma\",\"power\":\"0 dBmV\",\"profile_ids\":\"Unknown\",\"type\":\"upstream\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 1,
+                    "channel_id": 0,
+                    "frequency": 0,
+                    "lock_status": "Not Locked",
+                    "locked": false,
+                    "modulation_type": "ofdma",
+                    "power": 0.0,
+                    "type": "upstream"
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "@timestamp": "2026-09-22T19:38:54.196137300Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"2\",\"channel_id\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation_type\":\"ofdma\",\"power\":\"0 dBmV\",\"profile_ids\":\"Unknown\",\"type\":\"upstream\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 2,
+                    "channel_id": 0,
+                    "frequency": 0,
+                    "lock_status": "Not Locked",
+                    "locked": false,
+                    "modulation_type": "ofdma",
+                    "power": 0.0,
+                    "type": "upstream"
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

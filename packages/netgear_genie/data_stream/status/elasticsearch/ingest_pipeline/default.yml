@@ -1,0 +1,232 @@
+---
+description: Pipeline for processing NETGEAR Genie cable modem status, startup procedure and web interface availability.
+processors:
+  - set:
+      field: ecs.version
+      tag: set_ecs_version
+      value: '9.3.0'
+  - remove:
+      field:
+        - organization
+        - division
+        - team
+      ignore_missing: true
+      if: ctx.organization instanceof String && ctx.division instanceof String && ctx.team instanceof String
+      tag: remove_agentless_tags
+      description: >-
+        Removes the fields added by Agentless as metadata,
+        as they can collide with ECS fields.
+  - rename:
+      field: message
+      tag: rename_message_to_event_original
+      target_field: event.original
+      ignore_missing: true
+      description: Renames the original `message` field to `event.original` to store a copy of the original message. The `event.original` field is not touched if the document already has one; it may happen when Logstash sends the document.
+      if: ctx.event?.original == null
+  - remove:
+      field: message
+      tag: remove_message
+      ignore_missing: true
+      description: The `message` field is no longer required if the document has an `event.original` field.
+      if: ctx.event?.original != null
+  - json:
+      field: event.original
+      target_field: json
+      tag: parse_json
+      if: ctx.event?.original != null
+
+  # One document is written on every poll, including polls that collected no
+  # modem data, and the status page carries no collection timestamp, so each
+  # document is stamped with the time the poll reached Elasticsearch. The
+  # modem's own clock is kept in netgear_genie.status.current_system_time.
+  - set:
+      field: '@timestamp'
+      tag: set_timestamp_from_ingest
+      value: '{{{_ingest.timestamp}}}'
+      description: The modem status page reports a live snapshot without a collection timestamp, so the ingest time is used.
+
+  - set:
+      field: event.kind
+      tag: set_event_kind
+      value: metric
+  - set:
+      field: observer.vendor
+      tag: set_observer_vendor
+      value: NETGEAR
+  - set:
+      field: observer.type
+      tag: set_observer_type
+      value: modem
+
+  # Collection outcome. This is the only block present on every poll; the modem
+  # status fields below are written only when the web interface answered.
+  - rename:
+      field: json.web_ui
+      target_field: netgear_genie.status.web_ui
+      ignore_missing: true
+      tag: rename_web_ui
+  - script:
+      lang: painless
+      tag: set_event_duration
+      description: Records the status page round trip as event.duration, which ECS measures in nanoseconds.
+      if: ctx.netgear_genie?.status?.web_ui?.response_time_ms != null
+      source: |-
+        ctx.event = ctx.event ?: [:];
+        ctx.event.duration = ctx.netgear_genie.status.web_ui.response_time_ms * 1000000L;
+
+  # The modem clock is rendered without a time zone, for example
+  # "Tue Sep 22 00:16:13 2026". Interpret it in the configured time zone
+  # (tz_offset data stream setting), UTC by default.
+  - set:
+      field: _conf.tz_offset
+      tag: set_default_tz_offset
+      value: UTC
+      if: ctx._conf?.tz_offset == null || ctx._conf.tz_offset == ''
+  - set:
+      field: event.timezone
+      tag: set_event_timezone
+      value: '{{{_conf.tz_offset}}}'
+      if: ctx.json?.current_system_time != null && ctx.json.current_system_time != ''
+  - date:
+      field: json.current_system_time
+      target_field: netgear_genie.status.current_system_time
+      formats:
+        - 'EEE MMM d HH:mm:ss yyyy'
+        - 'EEE MMM  d HH:mm:ss yyyy'
+      timezone: '{{{_conf.tz_offset}}}'
+      tag: date_current_system_time
+      if: ctx.json?.current_system_time != null && ctx.json.current_system_time != ''
+
+  # Uptime is rendered as "HHH:MM:SS" where the hours are not wrapped at 24 and
+  # run into the hundreds. Keep the modem's rendering and expose the seconds.
+  - rename:
+      field: json.system_uptime
+      target_field: netgear_genie.status.system_uptime
+      ignore_missing: true
+      tag: rename_system_uptime
+  - script:
+      lang: painless
+      tag: set_uptime_seconds
+      description: Converts the modem uptime from HHH:MM:SS to seconds. The hours are not wrapped at 24, so a time parser cannot be used.
+      if: ctx.netgear_genie?.status?.system_uptime != null && ctx.netgear_genie.status.system_uptime != ''
+      source: |-
+        def parts = ctx.netgear_genie.status.system_uptime.splitOnToken(':');
+        if (parts.length != 3) {
+          return;
+        }
+        try {
+          ctx.netgear_genie.status.uptime_seconds = Long.parseLong(parts[0].trim()) * 3600L
+            + Long.parseLong(parts[1].trim()) * 60L
+            + Long.parseLong(parts[2].trim());
+        } catch (NumberFormatException e) {
+          return;
+        }
+
+  # Startup procedure rows, kept as the modem renders them. The downstream
+  # channel row is the one row whose status is a measurement rather than a
+  # state: it carries the primary downstream frequency, and the lock state of
+  # that channel is in its comment.
+  - rename:
+      field: json.startup_procedure
+      target_field: netgear_genie.status.startup_procedure
+      ignore_missing: true
+      tag: rename_startup_procedure
+  - grok:
+      field: netgear_genie.status.startup_procedure.acquire_downstream_channel.status
+      patterns:
+        - '^%{NUMBER:netgear_genie.status.startup_procedure.acquire_downstream_channel.frequency:long}\s*Hz$'
+      ignore_failure: true
+      tag: grok_acquire_downstream_channel_frequency
+      if: ctx.netgear_genie?.status?.startup_procedure?.acquire_downstream_channel?.status != null
+      description: Keeps the frequency only when the modem reports one; the row reads differently while the modem is still scanning.
+
+  # Device identity from the router status page. Absent when that page could
+  # not be read, in which case the web interface reason says so.
+  - rename:
+      field: json.device
+      target_field: netgear_genie.status.device
+      ignore_missing: true
+      tag: rename_device
+  - rename:
+      field: netgear_genie.status.device.serial_number
+      target_field: observer.serial_number
+      ignore_missing: true
+      tag: rename_serial_number_to_observer
+  - rename:
+      field: netgear_genie.status.device.firmware_version
+      target_field: observer.version
+      ignore_missing: true
+      tag: rename_firmware_version_to_observer
+
+  # The cable modem is the observer. Map its MAC address in ECS format
+  # (uppercase, dash separated), skipping the all-zero placeholder.
+  - set:
+      field: _tmp.observer_mac
+      copy_from: netgear_genie.status.device.cable_mac
+      tag: set_tmp_observer_mac
+      if: ctx.netgear_genie?.status?.device?.cable_mac != null && ctx.netgear_genie.status.device.cable_mac != '' && ctx.netgear_genie.status.device.cable_mac != '00:00:00:00:00:00'
+  - gsub:
+      field: _tmp.observer_mac
+      pattern: '[:.]'
+      replacement: '-'
+      ignore_missing: true
+      tag: gsub_observer_mac
+  - uppercase:
+      field: _tmp.observer_mac
+      ignore_missing: true
+      tag: uppercase_observer_mac
+  - append:
+      field: observer.mac
+      value: '{{{_tmp.observer_mac}}}'
+      allow_duplicates: false
+      tag: append_observer_mac
+      if: ctx._tmp?.observer_mac != null
+
+  # Categorization. The document is a measurement of the modem's state, and the
+  # outcome reports whether the poll got through to the web interface.
+  - set:
+      field: event.outcome
+      tag: set_event_outcome_success
+      value: success
+      if: ctx.netgear_genie?.status?.web_ui?.state == 'ok'
+  - set:
+      field: event.outcome
+      tag: set_event_outcome_failure
+      value: failure
+      if: ctx.netgear_genie?.status?.web_ui?.state != null && ctx.netgear_genie.status.web_ui.state != 'ok'
+
+  - remove:
+      field:
+        - json
+        - _tmp
+        - _conf
+      ignore_missing: true
+      tag: remove_temporary_fields
+  - append:
+      field: tags
+      value: preserve_original_event
+      allow_duplicates: false
+      tag: append_preserve_original_event_on_error
+      if: ctx.error?.message != null
+on_failure:
+  - append:
+      field: error.message
+      value: >-
+        Processor '{{{ _ingest.on_failure_processor_type }}}'
+        {{{#_ingest.on_failure_processor_tag}}}with tag '{{{ _ingest.on_failure_processor_tag }}}'
+        {{{/_ingest.on_failure_processor_tag}}}failed with message '{{{ _ingest.on_failure_message }}}'
+  - set:
+      field: event.kind
+      tag: set_pipeline_error_to_event_kind
+      value: pipeline_error
+  - append:
+      field: tags
+      value: preserve_original_event
+      allow_duplicates: false
+  - remove:
+      field:
+        - json
+        - _tmp
+        - _conf
+      ignore_missing: true
+      tag: remove_temporary_fields_on_failure

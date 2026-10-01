@@ -1,0 +1,16 @@
+- name: ecs.version
+  external: ecs
+- name: error.message
+  external: ecs
+- name: event.kind
+  external: ecs
+- name: event.original
+  external: ecs
+- name: observer.type
+  external: ecs
+- name: observer.vendor
+  external: ecs
+  type: constant_keyword
+  value: NETGEAR
+- name: tags
+  external: ecs

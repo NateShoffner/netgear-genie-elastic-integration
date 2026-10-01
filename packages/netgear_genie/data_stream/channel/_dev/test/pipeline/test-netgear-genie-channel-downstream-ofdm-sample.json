@@ -1,0 +1,10 @@
+{
+    "events": [
+        {
+            "message": "{\"channel\":\"1\",\"channel_id\":\"193\",\"correctable_codewords\":\"10892213027\",\"frequency\":\"900000000 Hz\",\"lock_status\":\"Locked\",\"modulation_type\":\"ofdm\",\"power\":\"-1.2 dBmV\",\"profile_ids\":\"0, 1, 2, 3\",\"snr\":\"41.8 dB\",\"subcarrier_range\":\"268 ~ 3827\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"1358\",\"unerrored_codewords\":\"76474070478\"}"
+        },
+        {
+            "message": "{\"channel\":\"2\",\"channel_id\":\"0\",\"correctable_codewords\":\"17504\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation_type\":\"ofdm\",\"power\":\"-1.2 dBmV\",\"profile_ids\":\"0\",\"snr\":\"41.5 dB\",\"subcarrier_range\":\"0 ~ 4095\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"0\",\"unerrored_codewords\":\"290723043\"}"
+        }
+    ]
+}

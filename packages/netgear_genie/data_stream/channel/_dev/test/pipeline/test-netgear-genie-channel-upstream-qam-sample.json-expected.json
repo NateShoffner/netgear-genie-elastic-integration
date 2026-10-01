@@ -1,0 +1,94 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T19:38:56.741080700Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"1\",\"channel_id\":\"17\",\"frequency\":\"16400000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"ATDMA\",\"modulation_type\":\"sc_qam\",\"power\":\"47.5 dBmV\",\"type\":\"upstream\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 1,
+                    "channel_id": 17,
+                    "frequency": 16400000,
+                    "lock_status": "Locked",
+                    "locked": true,
+                    "modulation": "ATDMA",
+                    "modulation_type": "sc_qam",
+                    "power": 47.5,
+                    "type": "upstream"
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "@timestamp": "2026-09-22T19:38:56.741095200Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"4\",\"channel_id\":\"20\",\"frequency\":\"35600000 Hz\",\"lock_status\":\"Locked\",\"modulation\":\"ATDMA\",\"modulation_type\":\"sc_qam\",\"power\":\"47.0 dBmV\",\"type\":\"upstream\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 4,
+                    "channel_id": 20,
+                    "frequency": 35600000,
+                    "lock_status": "Locked",
+                    "locked": true,
+                    "modulation": "ATDMA",
+                    "modulation_type": "sc_qam",
+                    "power": 47.0,
+                    "type": "upstream"
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "@timestamp": "2026-09-22T19:38:56.741098500Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"5\",\"channel_id\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation\":\"Unknown\",\"modulation_type\":\"sc_qam\",\"power\":\"0.0 dBmV\",\"type\":\"upstream\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 5,
+                    "channel_id": 0,
+                    "frequency": 0,
+                    "lock_status": "Not Locked",
+                    "locked": false,
+                    "modulation": "Unknown",
+                    "modulation_type": "sc_qam",
+                    "power": 0.0,
+                    "type": "upstream"
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

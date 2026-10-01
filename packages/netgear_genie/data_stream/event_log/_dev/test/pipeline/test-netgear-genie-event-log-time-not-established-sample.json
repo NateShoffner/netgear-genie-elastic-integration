@@ -1,0 +1,10 @@
+{
+    "events": [
+        {
+            "message": "{\"count\":\"1\",\"first_time\":\"Time Not Established\",\"id\":\"-1858273230\",\"index\":\"24\",\"last_time\":\"Time Not Established\",\"level\":\"Notice (6)\",\"text\":\"Honoring MDD; IP provisioning mode = IPv6\"}"
+        },
+        {
+            "message": "{\"count\":\"7\",\"first_time\":\"Time Not Established\",\"id\":\"85000200\",\"index\":\"25\",\"last_time\":\"Time Not Established\",\"level\":\"Critical (3)\",\"text\":\"UCD invalid or channel unusable;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}"
+        }
+    ]
+}

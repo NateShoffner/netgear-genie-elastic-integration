@@ -1,0 +1,32 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T20:17:15.394356500Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"web_ui\":{\"login_ok\":false,\"reachable\":false,\"reason\":\"GET /GenieLogin.asp: Get \\\"http://192.168.100.1/GenieLogin.asp\\\": dial tcp 192.168.100.1:80: connect: connection refused\",\"state\":\"unreachable\"}}",
+                "outcome": "failure"
+            },
+            "netgear_genie": {
+                "status": {
+                    "web_ui": {
+                        "login_ok": false,
+                        "reachable": false,
+                        "reason": "GET /GenieLogin.asp: Get \"http://192.168.100.1/GenieLogin.asp\": dial tcp 192.168.100.1:80: connect: connection refused",
+                        "state": "unreachable"
+                    }
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "id": "netgear_genie-modem-stopped-reporting",
+    "type": "alerting_rule_template",
+    "attributes": {
+        "name": "[NETGEAR Genie] Modem stopped reporting",
+        "tags": [
+            "NETGEAR Genie",
+            "Connectivity"
+        ],
+        "ruleTypeId": ".es-query",
+        "schedule": {
+            "interval": "5m"
+        },
+        "params": {
+            "searchType": "esQuery",
+            "esQuery": "{\"query\": {\"match_all\": {}}}",
+            "index": [
+                "metrics-netgear_genie.status-*"
+            ],
+            "timeField": "@timestamp",
+            "timeWindowSize": 16,
+            "timeWindowUnit": "m",
+            "threshold": [
+                1
+            ],
+            "thresholdComparator": "<",
+            "size": 0,
+            "aggType": "count",
+            "groupBy": "all",
+            "excludeHitsFromPreviousRun": false
+        },
+        "alertDelay": {
+            "active": 1
+        }
+    },
+    "coreMigrationVersion": "8.8.0",
+    "typeMigrationVersion": "10.1.0"
+}

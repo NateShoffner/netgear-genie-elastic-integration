@@ -1,0 +1,34 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T20:17:01.173864100Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "duration": 37000000,
+                "kind": "metric",
+                "original": "{\"web_ui\":{\"login_ok\":true,\"reachable\":true,\"reason\":\"GET /DocsisStatus.asp: the modem accepted the login but still answers protected pages with the login page; power cycle the modem if this persists\",\"response_time_ms\":37,\"state\":\"session_stuck\"}}",
+                "outcome": "failure"
+            },
+            "netgear_genie": {
+                "status": {
+                    "web_ui": {
+                        "login_ok": true,
+                        "reachable": true,
+                        "reason": "GET /DocsisStatus.asp: the modem accepted the login but still answers protected pages with the login page; power cycle the modem if this persists",
+                        "response_time_ms": 37,
+                        "state": "session_stuck"
+                    }
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

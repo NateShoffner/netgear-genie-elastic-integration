@@ -1,0 +1,95 @@
+- name: netgear_genie.status
+  type: group
+  fields:
+    - name: web_ui
+      type: group
+      description: Availability of the modem's Genie web interface. These fields are written on every poll, including polls that collected no data.
+      fields:
+        - name: state
+          type: keyword
+          description: Outcome of the poll. One of `ok` (logged in and the status page was parsed), `unreachable` (the modem did not answer), `http_error` (a page answered with an unexpected HTTP status), `auth_failed` (the login was sent back to the login page), `session_conflict` (another device holds the modem's single web session and session takeover is disabled) or `session_stuck` (the modem accepted the login but keeps answering protected pages with the login page, which needs a power cycle).
+        - name: reachable
+          type: boolean
+          description: Whether the modem answered the HTTP request at all. False only when the connection failed or timed out.
+        - name: login_ok
+          type: boolean
+          description: Whether the modem accepted the login. True when the login was redirected to the Genie index page, including when the status page later turned out to be the login stub.
+        - name: response_time_ms
+          type: long
+          unit: ms
+          metric_type: gauge
+          description: Round trip time of the DOCSIS status page request in milliseconds. Not present when the request was never made or never completed.
+        - name: reason
+          type: keyword
+          description: Human readable description of the outcome, including the request that failed and what to check.
+          multi_fields:
+            - name: text
+              type: match_only_text
+    - name: startup_procedure
+      type: group
+      description: Rows of the modem's startup procedure table, each reported as the modem renders them. Not present when the poll did not reach the status page.
+      fields:
+        - name: acquire_downstream_channel.status
+          type: keyword
+          description: Frequency of the primary downstream channel as the modem renders it, for example `801000000 Hz`.
+        - name: acquire_downstream_channel.comment
+          type: keyword
+          description: Lock state of the primary downstream channel, for example `Locked`. This row reports its state in the comment, not in the status.
+        - name: acquire_downstream_channel.frequency
+          type: long
+          metric_type: gauge
+          description: Center frequency of the primary downstream channel in hertz, parsed from the reported status. Not present while the modem is still scanning and reports no frequency.
+        - name: connectivity_state.status
+          type: keyword
+          description: Connectivity state of the modem, for example `OK`.
+        - name: connectivity_state.comment
+          type: keyword
+          description: Connectivity state detail, for example `Operational`.
+        - name: boot_state.status
+          type: keyword
+          description: Boot state of the modem, for example `OK`.
+        - name: boot_state.comment
+          type: keyword
+          description: Boot state detail, for example `Operational`.
+        - name: configuration_file.status
+          type: keyword
+          description: Whether the DOCSIS configuration file was accepted, for example `OK`.
+        - name: configuration_file.comment
+          type: keyword
+          description: Name of the DOCSIS configuration file the CMTS handed to the modem.
+        - name: security.status
+          type: keyword
+          description: Whether link security is enabled, for example `Enable`.
+        - name: security.comment
+          type: keyword
+          description: Link security method in use, for example `BPI+`.
+        - name: ip_provisioning_mode.status
+          type: keyword
+          description: IP provisioning mode selection, for example `Honor MDD`.
+        - name: ip_provisioning_mode.comment
+          type: keyword
+          description: IP provisioning mode in effect, for example `IPv6 only`.
+    - name: current_system_time
+      type: date
+      description: Modem clock at the time of the poll, read from the DOCSIS status page. The modem reports no timezone, so the value is interpreted in the timezone configured on the data stream.
+    - name: system_uptime
+      type: keyword
+      description: Time since the modem last booted, as the modem renders it in `HHH:MM:SS` form where the hours are not wrapped at 24.
+    - name: uptime_seconds
+      type: long
+      unit: s
+      metric_type: gauge
+      description: Time since the modem last booted, in seconds. A drop in this value means the modem rebooted.
+    - name: device
+      type: group
+      description: Device identity read from the router status page. Not present when that page could not be collected. The serial number, firmware version and MAC address are mapped to `observer.serial_number`, `observer.version` and `observer.mac`.
+      fields:
+        - name: hardware_version
+          type: keyword
+          description: Modem hardware version, for example `2.02`.
+        - name: cm_certificate
+          type: keyword
+          description: State of the cable modem's DOCSIS certificate, for example `Installed`.
+        - name: cable_mac
+          type: keyword
+          description: MAC address of the modem's cable interface, as the modem renders it. Also mapped to `observer.mac` in ECS format.

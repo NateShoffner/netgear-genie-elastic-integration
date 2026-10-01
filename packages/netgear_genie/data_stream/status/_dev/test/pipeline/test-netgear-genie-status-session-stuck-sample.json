@@ -1,0 +1,7 @@
+{
+    "events": [
+        {
+            "message": "{\"web_ui\":{\"login_ok\":true,\"reachable\":true,\"reason\":\"GET /DocsisStatus.asp: the modem accepted the login but still answers protected pages with the login page; power cycle the modem if this persists\",\"response_time_ms\":37,\"state\":\"session_stuck\"}}"
+        }
+    ]
+}

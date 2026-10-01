@@ -1,0 +1,276 @@
+---
+description: Pipeline for processing NETGEAR Genie cable modem event log (DOCSIS docsDevEventTable) rows.
+processors:
+  - set:
+      field: ecs.version
+      tag: set_ecs_version
+      value: '9.3.0'
+  - remove:
+      field:
+        - organization
+        - division
+        - team
+      ignore_missing: true
+      if: ctx.organization instanceof String && ctx.division instanceof String && ctx.team instanceof String
+      tag: remove_agentless_tags
+      description: >-
+        Removes the fields added by Agentless as metadata,
+        as they can collide with ECS fields.
+  - remove:
+      field: _conf
+      ignore_missing: true
+      if: ctx.error?.message != null && ctx.message == null && ctx.event?.original == null
+      tag: remove_conf_on_data_collection_error
+      description: Removes the agent configuration fields from collector error documents before processing stops.
+  - terminate:
+      tag: data_collection_error
+      if: ctx.error?.message != null && ctx.message == null && ctx.event?.original == null
+      description: error message set and no data to process.
+  - rename:
+      field: message
+      tag: rename_message_to_event_original
+      target_field: event.original
+      ignore_missing: true
+      description: Renames the original `message` field to `event.original` to store a copy of the original message. The `event.original` field is not touched if the document already has one; it may happen when Logstash sends the document.
+      if: ctx.event?.original == null
+  - remove:
+      field: message
+      tag: remove_message
+      ignore_missing: true
+      description: The `message` field is no longer required if the document has an `event.original` field.
+      if: ctx.event?.original != null
+  - json:
+      field: event.original
+      target_field: json
+      tag: parse_json
+      if: ctx.event?.original != null
+
+  # Deduplicate. Rows are aggregated in place by the modem (count and last
+  # time bump), and the CEL cursor intentionally re-emits rows last seen at the
+  # cursor time. A row is a new occurrence whenever any of these values change.
+  # The text carries the cable modem MAC address, which keeps rows from
+  # different modems apart.
+  - fingerprint:
+      fields:
+        - json.first_time
+        - json.id
+        - json.last_time
+        - json.count
+        - json.text
+      target_field: _id
+      ignore_missing: true
+      tag: fingerprint_id
+      if: ctx.json != null
+
+  - set:
+      field: event.kind
+      tag: set_event_kind
+      value: event
+  - set:
+      field: observer.vendor
+      tag: set_observer_vendor
+      value: NETGEAR
+  - set:
+      field: observer.type
+      tag: set_observer_type
+      value: modem
+
+  # Timestamps are "YYYY-MM-DD, HH:MM:SS" with no time zone. Interpret them in
+  # the configured time zone (tz_offset data stream setting), UTC by default.
+  - set:
+      field: _conf.tz_offset
+      tag: set_default_tz_offset
+      value: UTC
+      if: ctx._conf?.tz_offset == null || ctx._conf.tz_offset == ''
+  - set:
+      field: event.timezone
+      tag: set_event_timezone
+      value: '{{{_conf.tz_offset}}}'
+  # An event the modem logged before it had learned the time of day carries the
+  # literal "Time Not Established" in place of a timestamp, so there is no event
+  # time to parse. Those rows keep the collection time as their `@timestamp` and
+  # are tagged, so a search can tell a real event time from a stand-in one.
+  - append:
+      field: tags
+      value: time_not_established
+      tag: append_time_not_established
+      allow_duplicates: false
+      if: >-
+        (ctx.json?.last_time != null && ctx.json.last_time != ''
+          && !Character.isDigit(ctx.json.last_time.charAt(0)))
+        || (ctx.json?.first_time != null && ctx.json.first_time != ''
+          && !Character.isDigit(ctx.json.first_time.charAt(0)))
+  - date:
+      field: json.last_time
+      target_field: '@timestamp'
+      formats:
+        - 'yyyy-MM-dd, HH:mm:ss'
+      timezone: '{{{_conf.tz_offset}}}'
+      tag: date_last_time_to_timestamp
+      if: ctx.json?.last_time != null && ctx.json.last_time != '' && Character.isDigit(ctx.json.last_time.charAt(0))
+  - date:
+      field: json.last_time
+      target_field: event.end
+      formats:
+        - 'yyyy-MM-dd, HH:mm:ss'
+      timezone: '{{{_conf.tz_offset}}}'
+      tag: date_last_time_to_event_end
+      if: ctx.json?.last_time != null && ctx.json.last_time != '' && Character.isDigit(ctx.json.last_time.charAt(0))
+  - date:
+      field: json.first_time
+      target_field: event.start
+      formats:
+        - 'yyyy-MM-dd, HH:mm:ss'
+      timezone: '{{{_conf.tz_offset}}}'
+      tag: date_first_time_to_event_start
+      if: ctx.json?.first_time != null && ctx.json.first_time != '' && Character.isDigit(ctx.json.first_time.charAt(0))
+
+  # DOCSIS event id. Kept as a string; vendor event ids can be negative.
+  - rename:
+      field: json.id
+      target_field: event.code
+      ignore_missing: true
+      tag: rename_id_to_event_code
+      if: ctx.json?.id != ''
+
+  - convert:
+      field: json.index
+      target_field: netgear_genie.event_log.index
+      type: long
+      ignore_missing: true
+      tag: convert_index
+      if: ctx.json?.index != ''
+  - convert:
+      field: json.count
+      target_field: netgear_genie.event_log.count
+      type: long
+      ignore_missing: true
+      tag: convert_count
+      if: ctx.json?.count != ''
+
+  # Level is "<Name> (<severity number>)", e.g. "Critical (3)".
+  - grok:
+      field: json.level
+      patterns:
+        - '^%{DATA:log.level} \(%{INT:event.severity:long}\)$'
+        - '^%{GREEDYDATA:log.level}$'
+      tag: grok_level
+      if: ctx.json?.level != null && ctx.json.level != ''
+  - lowercase:
+      field: log.level
+      ignore_missing: true
+      tag: lowercase_log_level
+
+  # Text is the event message followed by an optional trailing run of
+  # "KEY=value;" pairs (CM-MAC, CMTS-MAC, CM-QOS, CM-VER). The message part
+  # itself may contain ";" and ":".
+  - grok:
+      field: json.text
+      patterns:
+        - '^(?:%{GREEDYDATA_LAZY:message};)?%{DOCSIS_TRAILERS:_tmp.trailers}$'
+        - '^%{GREEDYDATA:message}$'
+      pattern_definitions:
+        GREEDYDATA_LAZY: '.*?'
+        DOCSIS_TRAILERS: '(?:(?:CM-MAC|CMTS-MAC|CM-QOS|CM-VER)=[^;]*(?:;|$))+'
+      tag: grok_text
+      if: ctx.json?.text != null && ctx.json.text != ''
+  - kv:
+      field: _tmp.trailers
+      target_field: _tmp.kv
+      field_split: ';'
+      value_split: '='
+      ignore_missing: true
+      tag: kv_text_trailers
+  - rename:
+      field: _tmp.kv.CM-MAC
+      target_field: netgear_genie.event_log.cm_mac
+      ignore_missing: true
+      tag: rename_cm_mac
+  - rename:
+      field: _tmp.kv.CMTS-MAC
+      target_field: netgear_genie.event_log.cmts_mac
+      ignore_missing: true
+      tag: rename_cmts_mac
+  - rename:
+      field: _tmp.kv.CM-QOS
+      target_field: netgear_genie.event_log.cm_qos
+      ignore_missing: true
+      tag: rename_cm_qos
+  - rename:
+      field: _tmp.kv.CM-VER
+      target_field: netgear_genie.event_log.cm_ver
+      ignore_missing: true
+      tag: rename_cm_ver
+
+  # The cable modem is the observer. Map its MAC address in ECS format
+  # (uppercase, dash separated), skipping the all-zero placeholder.
+  - set:
+      field: _tmp.observer_mac
+      copy_from: netgear_genie.event_log.cm_mac
+      tag: set_tmp_observer_mac
+      if: ctx.netgear_genie?.event_log?.cm_mac != null && ctx.netgear_genie.event_log.cm_mac != '' && ctx.netgear_genie.event_log.cm_mac != '00:00:00:00:00:00'
+  - gsub:
+      field: _tmp.observer_mac
+      pattern: '[:.]'
+      replacement: '-'
+      ignore_missing: true
+      tag: gsub_observer_mac
+  - uppercase:
+      field: _tmp.observer_mac
+      ignore_missing: true
+      tag: uppercase_observer_mac
+  - append:
+      field: observer.mac
+      value: '{{{_tmp.observer_mac}}}'
+      allow_duplicates: false
+      tag: append_observer_mac
+      if: ctx._tmp?.observer_mac != null
+
+  # Categorization. Every row is an informational record of a DOCSIS network
+  # event; its severity is carried by log.level and event.severity.
+  - append:
+      field: event.category
+      value: network
+      allow_duplicates: false
+      tag: append_event_category_network
+  - append:
+      field: event.type
+      value: info
+      allow_duplicates: false
+      tag: append_event_type_info
+
+  - remove:
+      field:
+        - json
+        - _tmp
+        - _conf
+      ignore_missing: true
+      tag: remove_temporary_fields
+  - append:
+      field: tags
+      value: preserve_original_event
+      allow_duplicates: false
+      tag: append_preserve_original_event_on_error
+      if: ctx.error?.message != null
+on_failure:
+  - append:
+      field: error.message
+      value: >-
+        Processor '{{{ _ingest.on_failure_processor_type }}}'
+        {{{#_ingest.on_failure_processor_tag}}}with tag '{{{ _ingest.on_failure_processor_tag }}}'
+        {{{/_ingest.on_failure_processor_tag}}}failed with message '{{{ _ingest.on_failure_message }}}'
+  - set:
+      field: event.kind
+      tag: set_pipeline_error_to_event_kind
+      value: pipeline_error
+  - append:
+      field: tags
+      value: preserve_original_event
+      allow_duplicates: false
+  - remove:
+      field:
+        - json
+        - _tmp
+        - _conf
+      ignore_missing: true
+      tag: remove_temporary_fields_on_failure

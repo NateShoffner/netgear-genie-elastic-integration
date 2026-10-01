@@ -1,0 +1,49 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T03:17:46.000-04:00",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "category": [
+                    "network"
+                ],
+                "code": "82000500",
+                "end": "2026-09-22T03:17:46.000-04:00",
+                "kind": "event",
+                "original": "{\"count\":\"94\",\"first_time\":\"2026-08-31, 08:00:55\",\"id\":\"82000500\",\"index\":\"1\",\"last_time\":\"2026-09-22, 03:17:46\",\"level\":\"Critical (3)\",\"text\":\"Started Unicast Maintenance Ranging - No Response received - T3 time-out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}",
+                "severity": 3,
+                "start": "2026-08-31T08:00:55.000-04:00",
+                "timezone": "America/New_York",
+                "type": [
+                    "info"
+                ]
+            },
+            "log": {
+                "level": "critical"
+            },
+            "message": "Started Unicast Maintenance Ranging - No Response received - T3 time-out",
+            "netgear_genie": {
+                "event_log": {
+                    "cm_mac": "00:00:5e:00:53:01",
+                    "cm_qos": "1.1",
+                    "cm_ver": "3.1",
+                    "cmts_mac": "00:00:5e:00:53:02",
+                    "count": 94,
+                    "index": 1
+                }
+            },
+            "observer": {
+                "mac": [
+                    "00-00-5E-00-53-01"
+                ],
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+    "id": "netgear_genie-web-interface-not-responding",
+    "type": "alerting_rule_template",
+    "attributes": {
+        "name": "[NETGEAR Genie] Modem web interface not responding",
+        "tags": [
+            "NETGEAR Genie",
+            "Connectivity"
+        ],
+        "ruleTypeId": ".es-query",
+        "schedule": {
+            "interval": "5m"
+        },
+        "params": {
+            "searchType": "esqlQuery",
+            "timeWindowSize": 16,
+            "timeWindowUnit": "m",
+            "threshold": [
+                0
+            ],
+            "thresholdComparator": ">",
+            "size": 100,
+            "esqlQuery": {
+                "esql": "FROM metrics-netgear_genie.status-*\n// The status data stream writes one document for every poll, whether or not\n// the modem answered, so a window that holds polls but no healthy one means\n// the web interface is unusable rather than merely unmonitored. Requiring\n// every poll in the window to be unhealthy keeps a single slow or dropped\n// poll from raising an alert.\n| STATS polls = COUNT(*),\n        healthy = COUNT(CASE(netgear_genie.status.web_ui.state == \"ok\", 1, null)),\n        states = VALUES(netgear_genie.status.web_ui.state),\n        reasons = VALUES(netgear_genie.status.web_ui.reason)\n| WHERE healthy == 0"
+            },
+            "aggType": "count",
+            "groupBy": "row",
+            "termSize": 5,
+            "sourceFields": [],
+            "timeField": "@timestamp",
+            "excludeHitsFromPreviousRun": false
+        },
+        "alertDelay": {
+            "active": 1
+        }
+    },
+    "coreMigrationVersion": "8.8.0",
+    "typeMigrationVersion": "10.1.0"
+}

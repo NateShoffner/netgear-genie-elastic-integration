@@ -1,0 +1,60 @@
+- name: netgear_genie.channel
+  type: group
+  fields:
+    - name: type
+      type: keyword
+      description: Direction of the channel, derived from the table the row was read from. One of `downstream` or `upstream`.
+    - name: modulation_type
+      type: keyword
+      description: Channel type, derived from the table the row was read from. One of `sc_qam` (DOCSIS 3.0 bonded channel), `ofdm` (DOCSIS 3.1 downstream) or `ofdma` (DOCSIS 3.1 upstream).
+    - name: channel
+      type: long
+      description: Position of the channel in the modem's channel table. Every slot is reported on every poll; unused slots are reported as not locked with zero values.
+    - name: channel_id
+      type: long
+      description: DOCSIS channel identifier assigned by the CMTS. Zero when the channel is not locked.
+    - name: lock_status
+      type: keyword
+      description: Lock status of the channel as reported by the modem, for example `Locked` or `Not Locked`.
+    - name: locked
+      type: boolean
+      description: Whether the channel is locked. True when the modem reports the lock status as `Locked`. Count this field to chart how many of the modem's channel slots are in use.
+    - name: modulation
+      type: keyword
+      description: Modulation of a single carrier QAM channel, for example `QAM256` or `ATDMA`. Reported as `Unknown` on unused slots. Not present on OFDM and OFDMA channels.
+    - name: profile_ids
+      type: keyword
+      description: Profile identifiers active on an OFDM or OFDMA channel. Not present on single carrier QAM channels, nor when the modem reports a placeholder such as `Unknown` instead of a profile list.
+    - name: frequency
+      type: long
+      metric_type: gauge
+      description: Center frequency of the channel in hertz. Zero when the channel is not locked.
+    - name: power
+      type: double
+      metric_type: gauge
+      description: Received (downstream) or transmitted (upstream) power level in dBmV. Healthy ranges are roughly -7 to +7 dBmV downstream and 35 to 51 dBmV upstream.
+    - name: snr
+      type: double
+      metric_type: gauge
+      description: Signal to noise ratio / modulation error ratio in dB. Only reported for downstream channels; 33 dB or more is healthy for QAM256.
+    - name: subcarrier_range
+      type: keyword
+      description: Active subcarrier number range of an OFDM channel as reported by the modem, for example `268 ~ 3827`.
+    - name: subcarrier_range_start
+      type: long
+      description: First active subcarrier number of an OFDM channel, parsed from the reported range.
+    - name: subcarrier_range_end
+      type: long
+      description: Last active subcarrier number of an OFDM channel, parsed from the reported range.
+    - name: unerrored_codewords
+      type: long
+      metric_type: counter
+      description: Codewords received without errors since the modem booted.
+    - name: correctable_codewords
+      type: long
+      metric_type: counter
+      description: Codewords received with errors that forward error correction was able to correct, since the modem booted.
+    - name: uncorrectable_codewords
+      type: long
+      metric_type: counter
+      description: Codewords received with errors that forward error correction was not able to correct, since the modem booted. A rising rate here is the strongest signal of a plant problem.

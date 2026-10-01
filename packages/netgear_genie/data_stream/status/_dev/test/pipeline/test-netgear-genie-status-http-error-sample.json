@@ -1,0 +1,7 @@
+{
+    "events": [
+        {
+            "message": "{\"web_ui\":{\"login_ok\":true,\"reachable\":true,\"reason\":\"GET /DocsisStatus.asp returned 503 Service Unavailable\",\"response_time_ms\":15043,\"state\":\"http_error\"}}"
+        }
+    ]
+}

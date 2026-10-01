@@ -1,0 +1,10 @@
+{
+    "events": [
+        {
+            "message": "{\"channel\":\"1\",\"channel_id\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation_type\":\"ofdma\",\"power\":\"0 dBmV\",\"profile_ids\":\"Unknown\",\"type\":\"upstream\"}"
+        },
+        {
+            "message": "{\"channel\":\"2\",\"channel_id\":\"0\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation_type\":\"ofdma\",\"power\":\"0 dBmV\",\"profile_ids\":\"Unknown\",\"type\":\"upstream\"}"
+        }
+    ]
+}

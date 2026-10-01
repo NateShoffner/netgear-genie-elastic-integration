@@ -1,0 +1,13 @@
+{
+    "events": [
+        {
+            "message": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 08:00:52\",\"id\":\"85010200\",\"index\":\"2\",\"last_time\":\"2026-08-31, 08:00:52\",\"level\":\"Warning (5)\",\"text\":\"TCS Partial Service;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}"
+        },
+        {
+            "message": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:59:03\",\"id\":\"84020200\",\"index\":\"30\",\"last_time\":\"2026-08-31, 07:59:03\",\"level\":\"Warning (5)\",\"text\":\"Lost MDD Timeout;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;\"}"
+        },
+        {
+            "message": "{\"count\":\"14\",\"first_time\":\"2026-08-31, 07:57:05\",\"id\":\"84020300\",\"index\":\"38\",\"last_time\":\"2026-08-31, 07:57:05\",\"level\":\"Warning (5)\",\"text\":\"MDD message timeout;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}"
+        }
+    ]
+}

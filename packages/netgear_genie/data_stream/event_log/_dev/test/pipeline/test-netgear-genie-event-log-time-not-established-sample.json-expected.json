@@ -1,0 +1,83 @@
+{
+    "expected": [
+        {
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "category": [
+                    "network"
+                ],
+                "code": "-1858273230",
+                "kind": "event",
+                "original": "{\"count\":\"1\",\"first_time\":\"Time Not Established\",\"id\":\"-1858273230\",\"index\":\"24\",\"last_time\":\"Time Not Established\",\"level\":\"Notice (6)\",\"text\":\"Honoring MDD; IP provisioning mode = IPv6\"}",
+                "severity": 6,
+                "timezone": "UTC",
+                "type": [
+                    "info"
+                ]
+            },
+            "log": {
+                "level": "notice"
+            },
+            "message": "Honoring MDD; IP provisioning mode = IPv6",
+            "netgear_genie": {
+                "event_log": {
+                    "count": 1,
+                    "index": 24
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event",
+                "time_not_established"
+            ]
+        },
+        {
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "category": [
+                    "network"
+                ],
+                "code": "85000200",
+                "kind": "event",
+                "original": "{\"count\":\"7\",\"first_time\":\"Time Not Established\",\"id\":\"85000200\",\"index\":\"25\",\"last_time\":\"Time Not Established\",\"level\":\"Critical (3)\",\"text\":\"UCD invalid or channel unusable;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}",
+                "severity": 3,
+                "timezone": "UTC",
+                "type": [
+                    "info"
+                ]
+            },
+            "log": {
+                "level": "critical"
+            },
+            "message": "UCD invalid or channel unusable",
+            "netgear_genie": {
+                "event_log": {
+                    "cm_mac": "00:00:5e:00:53:01",
+                    "cm_qos": "1.1",
+                    "cm_ver": "3.1",
+                    "cmts_mac": "00:00:5e:00:53:02",
+                    "count": 7,
+                    "index": 25
+                }
+            },
+            "observer": {
+                "mac": [
+                    "00-00-5E-00-53-01"
+                ],
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event",
+                "time_not_established"
+            ]
+        }
+    ]
+}

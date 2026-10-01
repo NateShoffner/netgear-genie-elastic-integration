@@ -1,0 +1,21 @@
+- name: netgear_genie.event_log
+  type: group
+  fields:
+    - name: index
+      type: long
+      description: Position of the row in the modem event table (docsDevEvIndex). 1 is the newest row; the index shifts as new events are logged.
+    - name: count
+      type: long
+      description: Number of times this event was logged between the first and last time (docsDevEvCounts). The modem aggregates repeated events into a single row.
+    - name: cm_mac
+      type: keyword
+      description: Cable modem MAC address reported in the event text (CM-MAC), as reported by the modem.
+    - name: cmts_mac
+      type: keyword
+      description: Cable modem termination system (CMTS) MAC address reported in the event text (CMTS-MAC). All zeros when the CMTS is not known.
+    - name: cm_qos
+      type: keyword
+      description: DOCSIS QoS version reported in the event text (CM-QOS).
+    - name: cm_ver
+      type: keyword
+      description: DOCSIS version of the cable modem reported in the event text (CM-VER).

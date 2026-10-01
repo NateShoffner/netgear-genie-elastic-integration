@@ -1,0 +1,69 @@
+format_version: "3.4.2"
+name: netgear_genie
+title: "NETGEAR Genie"
+version: "0.1.0"
+source:
+  license: "Elastic-2.0"
+description: "Collect the event log, DOCSIS channel metrics and device status from NETGEAR cable modems with the Genie web interface (CM1000v2 and similar) with Elastic Agent."
+type: integration
+categories:
+  - network
+conditions:
+  kibana:
+    version: "^8.19.0 || ^9.1.0"
+  elastic:
+    subscription: "basic"
+icons:
+  - src: /img/netgear_genie-logo.png
+    title: NETGEAR logo
+    size: 157x50
+    type: image/png
+screenshots:
+  - src: /img/netgear_genie-modem-health-overview.png
+    title: Modem health overview dashboard
+    size: 3200x4832
+    type: image/png
+  - src: /img/netgear_genie-docsis-channels.png
+    title: DOCSIS channels dashboard
+    size: 3200x3992
+    type: image/png
+policy_templates:
+  - name: netgear_genie
+    title: NETGEAR Genie cable modem
+    description: Collect event logs, DOCSIS channel metrics and status from a NETGEAR Genie cable modem.
+    inputs:
+      - type: cel
+        title: Collect data from the modem web interface
+        description: Poll the modem's Genie web interface over HTTP.
+        vars:
+          - name: url
+            type: text
+            title: Modem URL
+            description: Base URL of the modem's web interface.
+            required: true
+            show_user: true
+            default: http://192.168.100.1
+          - name: username
+            type: text
+            title: Username
+            description: Username for the modem's web interface.
+            required: true
+            show_user: true
+            default: admin
+          - name: password
+            type: password
+            title: Password
+            description: Password for the modem's web interface.
+            required: true
+            show_user: true
+            secret: true
+          - name: http_client_timeout
+            type: text
+            title: HTTP Client Timeout
+            description: Duration before declaring that the HTTP client connection has timed out. Valid time units are ns, us, ms, s, m, h.
+            required: true
+            show_user: false
+            default: 30s
+owner:
+  github: NateShoffner
+  type: community

@@ -1,0 +1,10 @@
+# elastic-package build output
+build/
+
+# Development scratch: raw captures pulled straight off the modem, CEL
+# scratch programs, replayed dashboard data and rendered verification
+# screenshots. These hold the real device's serial number and MAC addresses,
+# so they stay out of the published repository. The package itself is
+# self-contained: its mocks, fixtures and sample events all use
+# documentation-range addresses.
+_research/

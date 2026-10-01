@@ -1,0 +1,13 @@
+{
+    "events": [
+        {
+            "message": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:59:52\",\"id\":\"67061600\",\"index\":\"22\",\"last_time\":\"2026-08-31, 07:59:52\",\"level\":\"Notice (6)\",\"text\":\"DS profile assignment change. DS Chan ID: 32; Previous Profile: ; New Profile: 1 2 3.;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;\"}"
+        },
+        {
+            "message": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:59:42\",\"id\":\"-1858273230\",\"index\":\"23\",\"last_time\":\"2026-08-31, 07:59:42\",\"level\":\"Notice (6)\",\"text\":\"Honoring MDD; IP provisioning mode = IPv6\"}"
+        },
+        {
+            "message": "{\"count\":\"1\",\"first_time\":\"2026-08-31, 07:56:40\",\"id\":\"69010200\",\"index\":\"9\",\"last_time\":\"2026-08-31, 07:56:40\",\"level\":\"Notice (6)\",\"text\":\"Cable Modem Reboot because of - 'Reboot UI' & power cycle;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;\"}"
+        }
+    ]
+}

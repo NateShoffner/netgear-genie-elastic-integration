@@ -1,0 +1,345 @@
+rules:
+  # Step 1: login page carrying the one-time webToken (unquoted digits) and
+  # the SessionID cookie the V10.01.07 firmware sets.
+  - path: /GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <title>NETGEAR Modem CM1000v2</title>
+          </head>
+          <body>
+              <form id="target"  name="login" method="POST" action="/goform/GenieLogin">
+                  <input type="text" name="loginUsername" size="18" maxlength="32" value="">
+                  <input type="password" name="loginPassword" size="18" maxlength="32" value="">
+                  <button id="apply" value="1" type="SUBMIT" name="login" class="button-apply">Login</button>
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  # Step 2a: correct credentials and token. The modem answers with a 302 to
+  # /GenieIndex.asp. The form body is merged into the query by the mock.
+  # The redirect carries a short HTML body, which is what the modem's own
+  # HTTP/1.0 redirects do. Once the client has followed such a redirect the
+  # body can no longer be read, the request fails with "read on closed response
+  # body" and the collector never sees where the login landed, so it assumes
+  # the login worked and lets the event log page decide. That is the path a
+  # real modem takes, so the default test credentials take it too.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: admin
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: '<html><body>Redirect</body></html>'
+  # Step 2b: a successful login whose redirect carries no body. Nothing is left
+  # unread, so the redirect is followed through and the collector reads the
+  # landing page from the final request URL. Selected with the `bodyless-user`
+  # name. The two rules below are bodyless for the same reason: they are told
+  # apart by the page the login lands on, and a body-carrying redirect hides
+  # that page, which is the limitation the `admin` rule above models.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: bodyless-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Step 2c: another device already holds the single session, so the modem
+  # sends the login to /MultiLogin.asp. Selected with the `busy-user` name.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: busy-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/MultiLogin.asp'
+        body: ''
+  # Step 2d: any other login attempt (bad credentials or stale token) is sent
+  # back to the login page.
+  - path: /goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieLogin.asp'
+        body: ''
+  # Session takeover page, reached when another device holds the session. It
+  # carries both a fresh webToken and the RetailSessionId to hand back.
+  - path: /MultiLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form method="POST" action="/goform/MultiLogin">
+                  You are currently logged in from another device. There can be only one device logged in at a time.
+                  <input type="hidden" name="RetailSessionId" value="987654321" />
+                  <input type="hidden" name="webToken" value=1234567890 />
+                  <input type="hidden" name="Act" value="yes" />
+                  <button id="yes" value="yes" type="SUBMIT" name="yes" class="button-apply">Yes</button>
+              </form>
+          </body>
+          </html>
+  # Session takeover. The modem drops the other device's session and lands on
+  # the Genie index page.
+  - path: /goform/MultiLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Redirect target of a successful login or session takeover.
+  - path: /GenieIndex.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><head><title>NETGEAR Modem CM1000v2</title></head><body></body></html>
+  # Step 3: event log page, served only when the session cookie is sent back.
+  # Poll 1 returns the initial table (9 rows). Every later poll returns the
+  # table after one new event was logged (new index 1) and the old index 1 row
+  # was aggregated in place (count and last time bumped). With the last_time
+  # cursor only those 2 rows are new on poll 2.
+  - path: /EventLog.asp
+    methods: ['GET']
+    request_headers:
+      Cookie:
+        - 'SessionID=1234567890'
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <HTML>
+              <HEAD>
+                  <META name="description" content='CM1000v2'>
+                  <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+                  <title>NETGEAR Modem CM1000v2</title>
+                  <script type="text/javascript">
+                      function InitTagValue()
+                      {
+          {{- if eq .req_num 1 }}
+                          var xmlFormat = '<docsDevEventTable><tr><docsDevEvIndex>1</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 08:00:55</docsDevEvFirstTime><docsDevEvLastTime>2026-09-22, 03:17:46</docsDevEvLastTime><docsDevEvCounts>94</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>82000500</docsDevEvId><docsDevEvText>Started Unicast Maintenance Ranging - No Response received - T3 time-out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>2</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 08:00:52</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 08:00:52</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Warning (5)</docsDevEvLevel><docsDevEvId>85010200</docsDevEvId><docsDevEvText>TCS Partial Service;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>3</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 08:00:30</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 08:00:51</docsDevEvLastTime><docsDevEvCounts>110</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>85000200</docsDevEvId><docsDevEvText>UCD invalid or channel unusable;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>4</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:52</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:52</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Notice (6)</docsDevEvLevel><docsDevEvId>67061600</docsDevEvId><docsDevEvText>DS profile assignment change. DS Chan ID: 32; Previous Profile: ; New Profile: 1 2 3.;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>5</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:42</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:42</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Notice (6)</docsDevEvLevel><docsDevEvId>-1858273230</docsDevEvId><docsDevEvText>Honoring MDD; IP provisioning mode = IPv6</docsDevEvText></tr><tr><docsDevEvIndex>6</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:27</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:27</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>84000100</docsDevEvId><docsDevEvText>SYNC Timing Synchronization failure - Failed to acquire QAM/QPSK symbol timing;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>7</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:03</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:03</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Warning (5)</docsDevEvLevel><docsDevEvId>84020200</docsDevEvId><docsDevEvText>Lost MDD Timeout;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>8</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:57:52</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:57:52</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>82000400</docsDevEvId><docsDevEvText>Received Response to Broadcast Maintenance Request, But no Unicast Maintenance opportunities received - T4 time out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>9</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:56:40</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:56:40</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Notice (6)</docsDevEvLevel><docsDevEvId>69010200</docsDevEvId><docsDevEvText>Cable Modem Reboot because of - &apos;Reboot UI&apos; &amp; power cycle;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>10</docsDevEvIndex><docsDevEvFirstTime>Time Not Established</docsDevEvFirstTime><docsDevEvLastTime>Time Not Established</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>84000100</docsDevEvId><docsDevEvText>SYNC Timing Synchronization failure - Failed to acquire QAM/QPSK symbol timing;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr></docsDevEventTable>';
+          {{- else }}
+                          var xmlFormat = '<docsDevEventTable><tr><docsDevEvIndex>1</docsDevEvIndex><docsDevEvFirstTime>2026-09-22, 03:30:12</docsDevEvFirstTime><docsDevEvLastTime>2026-09-22, 03:30:12</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>82000200</docsDevEvId><docsDevEvText>No Ranging Response received - T3 time-out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>2</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 08:00:55</docsDevEvFirstTime><docsDevEvLastTime>2026-09-22, 03:29:58</docsDevEvLastTime><docsDevEvCounts>97</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>82000500</docsDevEvId><docsDevEvText>Started Unicast Maintenance Ranging - No Response received - T3 time-out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>3</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 08:00:52</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 08:00:52</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Warning (5)</docsDevEvLevel><docsDevEvId>85010200</docsDevEvId><docsDevEvText>TCS Partial Service;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>4</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 08:00:30</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 08:00:51</docsDevEvLastTime><docsDevEvCounts>110</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>85000200</docsDevEvId><docsDevEvText>UCD invalid or channel unusable;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>5</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:52</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:52</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Notice (6)</docsDevEvLevel><docsDevEvId>67061600</docsDevEvId><docsDevEvText>DS profile assignment change. DS Chan ID: 32; Previous Profile: ; New Profile: 1 2 3.;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>6</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:42</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:42</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Notice (6)</docsDevEvLevel><docsDevEvId>-1858273230</docsDevEvId><docsDevEvText>Honoring MDD; IP provisioning mode = IPv6</docsDevEvText></tr><tr><docsDevEvIndex>7</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:27</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:27</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>84000100</docsDevEvId><docsDevEvText>SYNC Timing Synchronization failure - Failed to acquire QAM/QPSK symbol timing;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>8</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:59:03</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:59:03</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Warning (5)</docsDevEvLevel><docsDevEvId>84020200</docsDevEvId><docsDevEvText>Lost MDD Timeout;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>9</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:57:52</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:57:52</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>82000400</docsDevEvId><docsDevEvText>Received Response to Broadcast Maintenance Request, But no Unicast Maintenance opportunities received - T4 time out;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:5e:00:53:02;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>10</docsDevEvIndex><docsDevEvFirstTime>2026-08-31, 07:56:40</docsDevEvFirstTime><docsDevEvLastTime>2026-08-31, 07:56:40</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Notice (6)</docsDevEvLevel><docsDevEvId>69010200</docsDevEvId><docsDevEvText>Cable Modem Reboot because of - &apos;Reboot UI&apos; &amp; power cycle;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr><tr><docsDevEvIndex>11</docsDevEvIndex><docsDevEvFirstTime>Time Not Established</docsDevEvFirstTime><docsDevEvLastTime>Time Not Established</docsDevEvLastTime><docsDevEvCounts>1</docsDevEvCounts><docsDevEvLevel>Critical (3)</docsDevEvLevel><docsDevEvId>84000100</docsDevEvId><docsDevEvText>SYNC Timing Synchronization failure - Failed to acquire QAM/QPSK symbol timing;CM-MAC=00:00:5e:00:53:01;CMTS-MAC=00:00:00:00:00:00;CM-QOS=1.1;CM-VER=3.1;</docsDevEvText></tr></docsDevEventTable>';
+          {{- end }}
+                          return xmlFormat;
+                      }
+
+                      function BodyInit()
+                      {
+                          drawTableFromXML('eventlog_table', InitTagValue(), onAddRowCB);
+                      }
+                  </script>
+              </HEAD>
+              <BODY onLoad="change_size();" class="page-body" onResize="change_size();">
+                  <table id="eventlog_table"></table>
+              </BODY>
+          </HTML>
+  # Any request for a protected page without the session cookie gets the
+  # 613-byte login-redirect stub, which is also what a modem with a wedged web
+  # server returns after an apparently successful login.
+  - path: /EventLog.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <META http-equiv="Content-Style-Type" content="text/css">
+              <META http-equiv="Pragma" content="no-cache">
+              <META HTTP-equiv="Cache-Control" content="no-cache">
+              <META HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT">
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # Wedged web server, selected with a `/stuck` base URL: the login succeeds but
+  # every protected page keeps answering with the login-redirect stub, including
+  # after a session takeover.
+  - path: /stuck/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form id="target" name="login" method="POST" action="/goform/GenieLogin">
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  # `bodyless-user` gets a redirect with no body, so the login is known to have
+  # been accepted and the stuck report does not have to hedge about the
+  # credentials.
+  - path: /stuck/goform/GenieLogin
+    methods: ['POST']
+    query_params:
+      loginUsername: bodyless-user
+      loginPassword: test-password
+      login: '1'
+      webToken: '1234567890'
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  # Every other login gets the body-carrying redirect the real modem sends, so
+  # the collector cannot tell whether the credentials were accepted and says so
+  # in the stuck report.
+  - path: /stuck/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: '<html><body>Redirect</body></html>'
+  - path: /stuck/MultiLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE HTML>
+          <html>
+          <head><title>NETGEAR Modem CM1000v2</title></head>
+          <body>
+              <form method="POST" action="/goform/MultiLogin">
+                  You are currently logged in from another device. There can be only one device logged in at a time.
+                  <input type="hidden" name="RetailSessionId" value="987654321" />
+                  <input type="hidden" name="webToken" value=1234567890 />
+              </form>
+          </body>
+          </html>
+  - path: /stuck/goform/MultiLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /stuck/EventLog.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: |-
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <META http-equiv="Content-Type" content="text/html; charset=utf-8">
+              <meta name="description" content='CM1000v2'>
+              <META http-equiv="Content-Style-Type" content="text/css">
+              <META http-equiv="Pragma" content="no-cache">
+              <META HTTP-equiv="Cache-Control" content="no-cache">
+              <META HTTP-EQUIV="Expires" CONTENT="Mon, 06 Jan 1990 00:00:01 GMT">
+              <script type="text/javascript">
+                  function redirectPage()
+                  {
+                      window.top.location = "/GenieLogin.asp";
+                  }
+              </script>
+          </head>
+          <body onload="redirectPage();">
+          </body>
+          </html>
+  # The event log page answers with an unexpected HTTP status, selected with a
+  # `/httperr` base URL.
+  - path: /httperr/GenieLogin.asp
+    methods: ['GET']
+    responses:
+      - status_code: 200
+        headers:
+          Content-Type:
+            - 'text/html'
+          Set-Cookie:
+            - 'SessionID=1234567890; path=/'
+        body: |-
+          <!DOCTYPE HTML>
+          <html><body><form><input type="hidden" name="webToken" value=1234567890 /></form></body></html>
+  # Bodyless redirect so this scenario isolates the page error from the login.
+  - path: /httperr/goform/GenieLogin
+    methods: ['POST']
+    responses:
+      - status_code: 302
+        headers:
+          Location:
+            - '/GenieIndex.asp'
+        body: ''
+  - path: /httperr/EventLog.asp
+    methods: ['GET']
+    responses:
+      - status_code: 503
+        headers:
+          Content-Type:
+            - 'text/html'
+        body: '<html><body>Service Unavailable</body></html>'

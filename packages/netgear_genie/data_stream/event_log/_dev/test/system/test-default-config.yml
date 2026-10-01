@@ -1,0 +1,24 @@
+wait_for_data_timeout: 1m
+input: cel
+service: netgear_genie-event_log
+vars:
+  url: http://{{Hostname}}:{{Port}}
+  username: admin
+  password: test-password
+data_stream:
+  vars:
+    interval: 2s
+    take_over_session: true
+    preserve_original_event: true
+assert:
+  # Poll 1 collects the whole table (9 dated rows plus 1 the modem logged
+  # before it knew the time) and poll 2 the 2 rows the modem aggregated or
+  # added since. Later polls re-emit the newest row unchanged, which the
+  # pipeline fingerprints onto the same document id.
+  hit_count: 12
+  fields_present:
+    # The undated row has to survive the pipeline as a real event rather than
+    # failing the date processor, and has to be findable as one whose
+    # timestamp is the collection time rather than the event time.
+    - netgear_genie.event_log.cm_mac
+    - event.severity

@@ -1,0 +1,7 @@
+{
+    "events": [
+        {
+            "message": "{\"current_system_time\":\"Tue Sep 22 00:21:47 2026\",\"startup_procedure\":{\"acquire_downstream_channel\":{\"comment\":\"Locked\",\"status\":\"801000000 Hz\"},\"boot_state\":{\"comment\":\"Operational\",\"status\":\"OK\"},\"configuration_file\":{\"comment\":\"d11_m_cm1000v2_subnxgig_c01.cm\",\"status\":\"OK\"},\"connectivity_state\":{\"comment\":\"Operational\",\"status\":\"OK\"},\"ip_provisioning_mode\":{\"comment\":\"IPv6 only\",\"status\":\"Honor MDD\"},\"security\":{\"comment\":\"BPI+\",\"status\":\"Enable\"}},\"system_uptime\":\"602:54:43\",\"web_ui\":{\"login_ok\":true,\"reachable\":true,\"reason\":\"the DOCSIS status page was collected but the device identity page could not be read: GET /RouterStatus.asp: the page carries no tagValueList\",\"response_time_ms\":211,\"state\":\"ok\"}}"
+        }
+    ]
+}

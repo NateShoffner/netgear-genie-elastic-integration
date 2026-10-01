@@ -1,0 +1,85 @@
+{
+    "expected": [
+        {
+            "@timestamp": "2026-09-22T19:38:49.190164700Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"1\",\"channel_id\":\"193\",\"correctable_codewords\":\"10892213027\",\"frequency\":\"900000000 Hz\",\"lock_status\":\"Locked\",\"modulation_type\":\"ofdm\",\"power\":\"-1.2 dBmV\",\"profile_ids\":\"0, 1, 2, 3\",\"snr\":\"41.8 dB\",\"subcarrier_range\":\"268 ~ 3827\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"1358\",\"unerrored_codewords\":\"76474070478\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 1,
+                    "channel_id": 193,
+                    "correctable_codewords": 10892213027,
+                    "frequency": 900000000,
+                    "lock_status": "Locked",
+                    "locked": true,
+                    "modulation_type": "ofdm",
+                    "power": -1.2,
+                    "profile_ids": [
+                        "0",
+                        "1",
+                        "2",
+                        "3"
+                    ],
+                    "snr": 41.8,
+                    "subcarrier_range": "268 ~ 3827",
+                    "subcarrier_range_end": 3827,
+                    "subcarrier_range_start": 268,
+                    "type": "downstream",
+                    "uncorrectable_codewords": 1358,
+                    "unerrored_codewords": 76474070478
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        },
+        {
+            "@timestamp": "2026-09-22T19:38:49.190190700Z",
+            "ecs": {
+                "version": "9.3.0"
+            },
+            "event": {
+                "kind": "metric",
+                "original": "{\"channel\":\"2\",\"channel_id\":\"0\",\"correctable_codewords\":\"17504\",\"frequency\":\"0 Hz\",\"lock_status\":\"Not Locked\",\"modulation_type\":\"ofdm\",\"power\":\"-1.2 dBmV\",\"profile_ids\":\"0\",\"snr\":\"41.5 dB\",\"subcarrier_range\":\"0 ~ 4095\",\"type\":\"downstream\",\"uncorrectable_codewords\":\"0\",\"unerrored_codewords\":\"290723043\"}"
+            },
+            "netgear_genie": {
+                "channel": {
+                    "channel": 2,
+                    "channel_id": 0,
+                    "correctable_codewords": 17504,
+                    "frequency": 0,
+                    "lock_status": "Not Locked",
+                    "locked": false,
+                    "modulation_type": "ofdm",
+                    "power": -1.2,
+                    "profile_ids": [
+                        "0"
+                    ],
+                    "snr": 41.5,
+                    "subcarrier_range": "0 ~ 4095",
+                    "subcarrier_range_end": 4095,
+                    "subcarrier_range_start": 0,
+                    "type": "downstream",
+                    "uncorrectable_codewords": 0,
+                    "unerrored_codewords": 290723043
+                }
+            },
+            "observer": {
+                "type": "modem",
+                "vendor": "NETGEAR"
+            },
+            "tags": [
+                "preserve_original_event"
+            ]
+        }
+    ]
+}
