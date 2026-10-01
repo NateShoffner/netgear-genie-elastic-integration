@@ -1,5 +1,6 @@
-# elastic-package build output
-build/
+# elastic-package build output (repo root only, not packages/*/_dev/build)
+/build/
+*.tar.gz
 
 # Development scratch: raw captures pulled straight off the modem, CEL
 # scratch programs, replayed dashboard data and rendered verification
