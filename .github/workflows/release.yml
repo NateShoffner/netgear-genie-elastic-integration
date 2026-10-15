@@ -23,6 +23,9 @@ jobs:
     uses: NateShoffner/elastic-package-workflows/.github/workflows/release.yml@main
     with:
       package: packages/netgear_genie
+      # See the note in ci.yml: the status data stream's CEL program does not
+      # compile on agent 9.5.3, which the shared default would boot.
+      elastic-package-version: v0.125.1
 
   # TEMPORARY: the whole job. Runs every release check against the version in
   # manifest.yml and publishes nothing, so the migration is validated before
@@ -33,5 +36,6 @@ jobs:
     uses: NateShoffner/elastic-package-workflows/.github/workflows/release.yml@main
     with:
       package: packages/netgear_genie
+      elastic-package-version: v0.125.1
       tag: v0.1.0
       dry-run: true

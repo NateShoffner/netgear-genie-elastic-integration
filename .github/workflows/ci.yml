@@ -25,6 +25,13 @@ jobs:
     uses: NateShoffner/elastic-package-workflows/.github/workflows/ci.yml@main
     with:
       package: packages/netgear_genie
+      # Keeps the version the old workflow pinned. The shared default is
+      # v0.126.4, which boots stack 9.5.3, and on agent 9.5.3 the status data
+      # stream's CEL program fails to compile ("failed compilation: ERROR:
+      # <input>:125:10860: Syntax error: mismatched input '<EOF>'"), so the
+      # input never starts and its system test collects no documents. channel
+      # and event_log are unaffected. Drop this pin once that is fixed.
+      elastic-package-version: v0.125.1
       # TEMPORARY: forced on so this pull request exercises the full-stack
       # tests. Before merging, drop this line and restore the one below.
       stack-tests: true
