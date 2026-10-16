@@ -32,7 +32,4 @@ jobs:
       # input never starts and its system test collects no documents. channel
       # and event_log are unaffected. Drop this pin once that is fixed.
       elastic-package-version: v0.125.1
-      # TEMPORARY: forced on so this pull request exercises the full-stack
-      # tests. Before merging, drop this line and restore the one below.
-      stack-tests: true
-      # stack-tests: ${{ github.event_name == 'schedule' || inputs.stack-tests == true }}
+      stack-tests: ${{ github.event_name == 'schedule' || inputs.stack-tests == true }}
